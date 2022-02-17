@@ -1,0 +1,54 @@
+#######################################
+# Syntax Coloring DFRobot_MultiGasSensor
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+DFRobot_MultiGasSensor_I2C	KEYWORD1
+DFRobot_MultiGasSensor_HardWareUart	KEYWORD1
+DFRobot_MultiGasSensor_SoftWareUart	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin	KEYWORD2
+changeAcquireMode	KEYWORD2
+readGasConcentration	KEYWORD2
+readGasType	KEYWORD2
+setThresholdAlarm	KEYWORD2
+readTemp	KEYWORD2
+setTempCompensation	KEYWORD2
+readVolatageData	KEYWORD2
+setCustomizeIO	KEYWORD2
+dataIsAvailable	KEYWORD2
+readGasConcentrationPPM	KEYWORD2
+changeI2cAddrGroup	KEYWORD2
+queryGasType    KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+O2	LITERAL1
+CO	LITERAL1
+H2S	LITERAL1
+NO2	LITERAL1
+O3	LITERAL1
+CL2	LITERAL1
+NH3	LITERAL1
+H2	LITERAL1
+HCL	LITERAL1
+SO2	LITERAL1
+HF	LITERAL1
+_PH3	LITERAL1
+ON	LITERAL1
+OFF	LITERAL1
+TWENTY_FIVE	LITERAL1
+FIFTH	LITERAL1
+SEVENTY_FIVE	LITERAL1
+LOW_THRESHOLD_ALA	LITERAL1
+HIGH_THRESHOLD_ALA	LITERAL1
+INITIATIVE	LITERAL1
+PASSIVITY	LITERAL1
