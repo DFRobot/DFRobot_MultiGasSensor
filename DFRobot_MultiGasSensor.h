@@ -283,7 +283,7 @@ class DFRobot_GAS_I2C : public DFRobot_GAS
     DFRobot_GAS_I2C(TwoWire *pWire=&Wire,uint8_t addr=0x74);
     ~DFRobot_GAS_I2C(void){};
     bool begin(void);
-    float setI2cAddr(uint8_t addr);
+    void setI2cAddr(uint8_t addr);
     bool dataIsAvailable(void);
   protected:
     void writeData(uint8_t Reg ,void *Data ,uint8_t len);
