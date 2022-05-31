@@ -52,7 +52,7 @@ static void analysisAllData(void)
         case DFRobot_GAS::O2:
           break;
         case DFRobot_GAS::CO:
-          if (((_temp) > -20) && ((_temp) < 20))
+          if (((_temp) > -40) && ((_temp) <= 20))
             Con = (Con / (0.005 * (_temp) + 0.9));
           else if (((_temp) > 20) && ((_temp) < 40))
             Con = (Con / (0.005 * (_temp) + 0.9) - (0.3 * (_temp)-6));
@@ -60,66 +60,74 @@ static void analysisAllData(void)
             Con = 0.0;
           break;
         case DFRobot_GAS::H2S:
-          if (((_temp) > -20) && ((_temp) < 20))
-            Con = (Con / (0.006 * (_temp) + 0.92));
-          else if (((_temp) > 20) && ((_temp) < 40))
-            Con = (Con / (0.006 * (_temp) + 0.92) - (0.015 * (_temp) + 2.4));
+          if (((_temp) > -40) && ((_temp) <= 20))
+            Con = (Con / (0.005 * (_temp) + 0.92));
+          else if (((_temp) > 20) && ((_temp) <= 60))
+            Con = (Con  - (0.015 * (_temp) - 0.3));
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::NO2:
-          if (((_temp) > -20) && ((_temp) < 0))
-            Con = ((Con / (0.005 * (_temp) + 0.9) - (-0.0025 * (_temp))));
-          else if (((_temp) > 0) && ((_temp) < 20))
+          if (((_temp) > -20) && ((_temp) <= 0))
+            Con = ((Con / (0.005 * (_temp) + 0.9) - (-0.0025 * (_temp) + 0.005)));
+          else if (((_temp) > 0) && ((_temp) <= 20))
             Con = ((Con / (0.005 * (_temp) + 0.9) - (0.005 * (_temp) + 0.005)));
-          else if (((_temp) > 20) && ((_temp) < 40))
-            Con = ((Con / (0.005 * (_temp) + 0.9) - (0.0025 * (_temp) + 0.1)));
+          else if (((_temp) > 20) && ((_temp) <= 40))
+            Con = ((Con / (0.005 * (_temp) + 0.9) - (-0.0025 * (_temp) + 0.3)));
+          else if (((_temp) > 40) && ((_temp) < 50))
+            Con = ((Con / (0.005 * (_temp) + 0.9) - (-0.048 * (_temp) - 0.92)));
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::O3:
-          if (((_temp) > -20) && ((_temp) < 0))
+          if (((_temp) > -20) && ((_temp) <= 0))
             Con = ((Con / (0.015 * (_temp) + 1.1) - 0.05));
-          else if (((_temp) > 0) && ((_temp) < 20))
-            Con = ((Con / 1.1 - (0.01 * (_temp))));
-          else if (((_temp) > 20) && ((_temp) < 40))
-            Con = ((Con / 1.1 - (-0.05 * (_temp) + 0.3)));
+          else if (((_temp) > 0) && ((_temp) <= 20))
+            Con = ((Con  - (0.01 * (_temp))));
+          else if (((_temp) > 20) && ((_temp) <= 40))
+            Con = ((Con  - (-0.005 * (_temp) + 0.4)));
+          else if (((_temp) > 40) && ((_temp) < 50))
+            Con = Con - (0.067 * (_temp)-1.68);
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::CL2:
-          if (((_temp) > -20) && ((_temp) < 0))
-            Con = ((Con / (0.015 * (_temp) + 1.1) - (-0.0025 * (_temp))));
-          else if (((_temp) > 0) && ((_temp) < 20))
+          if (((_temp) > -20) && ((_temp) <= 0))
+            Con = ((Con / (0.015 * (_temp) + 1.1) - 0.0025 ));
+          else if (((_temp) > 0) && ((_temp) <= 20))
             Con = ((Con / 1.1 - 0.005 * (_temp)));
           else if (((_temp) > 20) && ((_temp) < 40))
-            Con = ((Con / 1.1 - (0.06 * (_temp)-0.12)));
+            Con = ((Con  - (-0.005 * (_temp)+0.3)));
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::NH3:
-          if (((_temp) > -20) && ((_temp) < 0))
-            Con = (Con / (0.08 * (_temp) + 3.98) - (-0.005 * (_temp) + 0.3));
-          else if (((_temp) > 0) && ((_temp) < 20))
-            Con = (Con / (0.08 * (_temp) + 3.98) - (-0.005 * (_temp) + 0.3));
+          if (((_temp) > -40) && ((_temp) <= 0))
+            Con = (Con / (0.006 * (_temp) + 0.95) - (-0.006 * (_temp) + 0.25));
+          else if (((_temp) > 0) && ((_temp) <= 20))
+            Con = (Con / (0.006 * (_temp) + 0.95) - (-0.012 * (_temp) + 0.25));
           else if (((_temp) > 20) && ((_temp) < 40))
-            Con = (Con / (0.004 * (_temp) + 1.08) - (-0.1 * (_temp) + 2));
+            Con = (Con / (0.005 * (_temp) + 1.08) - (-0.1 * (_temp) + 2));
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::H2:
-          if (((_temp) > -20) && ((_temp) < 40))
-            Con = (Con / (0.74 * (_temp) + 0.007) - 5);
+          if (((_temp) > -20) && ((_temp) <= 20))
+            Con = (Con / (0.0074 * (_temp) + 0.7) - 5);
+          if (((_temp) > 20) && ((_temp) <= 40))
+            Con = (Con / (0.025 * (_temp)+0.3)) - 5;
+          if (((_temp) > 40) && ((_temp) <= 60))
+            Con = (Con / (0.001 * (_temp) + 0.9)) - (0.75 * (_temp) - 25);
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::HF:
-          if (((_temp) > -20) && ((_temp) < 0))
-            Con = (((Con / 1) - (-0.0025 * (_temp))));
-          else if (((_temp) > 0) && ((_temp) < 20))
+          if (((_temp) > -20) && ((_temp) <= 0))
+            Con = (((Con / 1) - (-0.0075 * (_temp)-0.1)));
+          else if (((_temp) > 0) && ((_temp) <= 20))
             Con = ((Con / 1 + 0.1));
-          else if (((_temp) > 20) && ((_temp) < 40))
-            Con = ((Con / 1 - (0.0375 * (_temp)-0.85)));
+          else if (((_temp) > 20) && ((_temp) < 50))
+            Con = ((Con / 1 - (0.01 * (_temp)-0.85)));
           else
             Con = 0.0;
           break;
@@ -128,8 +136,18 @@ static void analysisAllData(void)
             Con = ((Con / (0.005 * (_temp) + 0.9)));
           break;
         case DFRobot_GAS::HCL:
-          break;
+          if ((_temp > -20) && (_temp >= 0))
+            Con = Con - (-0.0075 * _temp-0.1);
+          else if ((_temp > 0) && (_temp >= 20))
+            Con = Con-(-0.1);
+          else if ((_temp > 20) && (_temp >= 50))
+            Con = Con - (-0.01 * _temp + 0.1);
+            break;
         case DFRobot_GAS::SO2:
+          if ((_temp > -40) && (_temp >= 40))
+            Con = Con / (0.006 * _temp+0.95);
+          else if((_temp > 40) && (_temp >= 60))
+            Con = Con / (0.006 * _temp + 0.95) - (0.05 * _temp-2);
           break;
         default:
           break;
@@ -248,7 +266,7 @@ float DFRobot_GAS::readGasConcentrationPPM(void)
         case DFRobot_GAS::O2:
           break;
         case DFRobot_GAS::CO:
-          if (((_temp) > -20) && ((_temp) < 20))
+          if (((_temp) > -40) && ((_temp) <= 20))
             Con = (Con / (0.005 * (_temp) + 0.9));
           else if (((_temp) > 20) && ((_temp) < 40))
             Con = (Con / (0.005 * (_temp) + 0.9) - (0.3 * (_temp)-6));
@@ -256,66 +274,74 @@ float DFRobot_GAS::readGasConcentrationPPM(void)
             Con = 0.0;
           break;
         case DFRobot_GAS::H2S:
-          if (((_temp) > -20) && ((_temp) < 20))
-            Con = (Con / (0.006 * (_temp) + 0.92));
-          else if (((_temp) > 20) && ((_temp) < 40))
-            Con = (Con / (0.006 * (_temp) + 0.92) - (0.015 * (_temp) + 2.4));
+          if (((_temp) > -40) && ((_temp) <= 20))
+            Con = (Con / (0.005 * (_temp) + 0.92));
+          else if (((_temp) > 20) && ((_temp) <= 60))
+            Con = (Con - (0.015 * (_temp)-0.3));
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::NO2:
-          if (((_temp) > -20) && ((_temp) < 0))
-            Con = ((Con / (0.005 * (_temp) + 0.9) - (-0.0025 * (_temp))));
-          else if (((_temp) > 0) && ((_temp) < 20))
+          if (((_temp) > -20) && ((_temp) <= 0))
+            Con = ((Con / (0.005 * (_temp) + 0.9) - (-0.0025 * (_temp) + 0.005)));
+          else if (((_temp) > 0) && ((_temp) <= 20))
             Con = ((Con / (0.005 * (_temp) + 0.9) - (0.005 * (_temp) + 0.005)));
-          else if (((_temp) > 20) && ((_temp) < 40))
-            Con = ((Con / (0.005 * (_temp) + 0.9) - (0.0025 * (_temp) + 0.1)));
+          else if (((_temp) > 20) && ((_temp) <= 40))
+            Con = ((Con / (0.005 * (_temp) + 0.9) - (-0.0025 * (_temp) + 0.3)));
+          else if (((_temp) > 40) && ((_temp) < 50))
+            Con = ((Con / (0.005 * (_temp) + 0.9) - (-0.048 * (_temp)-0.92)));
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::O3:
-          if (((_temp) > -20) && ((_temp) < 0))
+          if (((_temp) > -20) && ((_temp) <= 0))
             Con = ((Con / (0.015 * (_temp) + 1.1) - 0.05));
-          else if (((_temp) > 0) && ((_temp) < 20))
-            Con = ((Con / 1.1 - (0.01 * (_temp))));
-          else if (((_temp) > 20) && ((_temp) < 40))
-            Con = ((Con / 1.1 - (-0.05 * (_temp) + 0.3)));
+          else if (((_temp) > 0) && ((_temp) <= 20))
+            Con = ((Con - (0.01 * (_temp))));
+          else if (((_temp) > 20) && ((_temp) <= 40))
+            Con = ((Con - (-0.005 * (_temp) + 0.4)));
+          else if (((_temp) > 40) && ((_temp) < 50))
+            Con = Con - (0.067 * (_temp)-1.68);
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::CL2:
-          if (((_temp) > -20) && ((_temp) < 0))
-            Con = ((Con / (0.015 * (_temp) + 1.1) - (-0.0025 * (_temp))));
-          else if (((_temp) > 0) && ((_temp) < 20))
+          if (((_temp) > -20) && ((_temp) <= 0))
+            Con = ((Con / (0.015 * (_temp) + 1.1) - 0.0025));
+          else if (((_temp) > 0) && ((_temp) <= 20))
             Con = ((Con / 1.1 - 0.005 * (_temp)));
           else if (((_temp) > 20) && ((_temp) < 40))
-            Con = ((Con / 1.1 - (0.06 * (_temp)-0.12)));
+            Con = ((Con - (-0.005 * (_temp) + 0.3)));
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::NH3:
-          if (((_temp) > -20) && ((_temp) < 0))
-            Con = (Con / (0.08 * (_temp) + 3.98) - (-0.005 * (_temp) + 0.3));
-          else if (((_temp) > 0) && ((_temp) < 20))
-            Con = (Con / (0.08 * (_temp) + 3.98) - (-0.005 * (_temp) + 0.3));
+          if (((_temp) > -40) && ((_temp) <= 0))
+            Con = (Con / (0.006 * (_temp) + 0.95) - (-0.006 * (_temp) + 0.25));
+          else if (((_temp) > 0) && ((_temp) <= 20))
+            Con = (Con / (0.006 * (_temp) + 0.95) - (-0.012 * (_temp) + 0.25));
           else if (((_temp) > 20) && ((_temp) < 40))
-            Con = (Con / (0.004 * (_temp) + 1.08) - (-0.1 * (_temp) + 2));
+            Con = (Con / (0.005 * (_temp) + 1.08) - (-0.1 * (_temp) + 2));
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::H2:
-          if (((_temp) > -20) && ((_temp) < 40))
-            Con = (Con / (0.74 * (_temp) + 0.007) - 5);
+          if (((_temp) > -20) && ((_temp) <= 20))
+            Con = (Con / (0.0074 * (_temp) + 0.7) - 5);
+          if (((_temp) > 20) && ((_temp) <= 40))
+            Con = (Con / (0.025 * (_temp) + 0.3)) - 5;
+          if (((_temp) > 40) && ((_temp) <= 60))
+            Con = (Con / (0.001 * (_temp) + 0.9)) - (0.75 * (_temp)-25);
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::HF:
-          if (((_temp) > -20) && ((_temp) < 0))
-            Con = (((Con / 1) - (-0.0025 * (_temp))));
-          else if (((_temp) > 0) && ((_temp) < 20))
+          if (((_temp) > -20) && ((_temp) <= 0))
+            Con = (((Con / 1) - (-0.0075 * (_temp)-0.1)));
+          else if (((_temp) > 0) && ((_temp) <= 20))
             Con = ((Con / 1 + 0.1));
-          else if (((_temp) > 20) && ((_temp) < 40))
-            Con = ((Con / 1 - (0.0375 * (_temp)-0.85)));
+          else if (((_temp) > 20) && ((_temp) < 50))
+            Con = ((Con / 1 - (0.01 * (_temp)-0.85)));
           else
             Con = 0.0;
           break;
@@ -324,8 +350,18 @@ float DFRobot_GAS::readGasConcentrationPPM(void)
             Con = ((Con / (0.005 * (_temp) + 0.9)));
           break;
         case DFRobot_GAS::HCL:
+          if ((_temp > -20) && (_temp >= 0))
+            Con = Con - (-0.0075 * _temp - 0.1);
+          else if ((_temp > 0) && (_temp >= 20))
+            Con = Con - (-0.1);
+          else if ((_temp > 20) && (_temp >= 50))
+            Con = Con - (-0.01 * _temp + 0.1);
           break;
         case DFRobot_GAS::SO2:
+          if ((_temp > -40) && (_temp >= 40))
+            Con = Con / (0.006 * _temp + 0.95);
+          else if ((_temp > 40) && (_temp >= 60))
+            Con = Con / (0.006 * _temp + 0.95) - (0.05 * _temp - 2);
           break;
         default:
           break;
@@ -401,21 +437,91 @@ String DFRobot_GAS::queryGasType(void)
 bool DFRobot_GAS::setThresholdAlarm(eSwitch_t switchof, uint16_t threshold, eALA_t alamethod,String gasType)
 {
   if (gasType == "O2")
-    threshold *= 10;
-  else if (gasType == "NO2")
-    threshold *= 10;
-  else if (gasType == "O3")
-    threshold *= 1;
-  else if (gasType == "CL2")
-    threshold *= 10;
-  else if (gasType == "HCL")
-    threshold *= 10;
+  {
+    if (threshold==0)
+      threshold=195;
+    else
+      threshold *= 10;
+  }
   else if (gasType == "SO2")
-    threshold *= 10;
-  else if (gasType == "HF")
-    threshold *= 10;
+  {
+    if (threshold == 0)
+      threshold = 100;
+    else
+      threshold *= 10;
+  }
   else if (gasType == "PH3")
-    threshold *= 10;
+  {
+    if (threshold == 0)
+      threshold = 50;
+    else
+      threshold *= 10;
+  }
+  else if (gasType == "NO2")
+  {
+    if (threshold == 0)
+      threshold = 50;
+    else
+      threshold *= 10;
+  }
+  else if (gasType == "O3")
+  {
+    if (threshold == 0)
+      threshold = 50;
+    else
+      threshold *= 10;
+  }
+  else if (gasType == "CL2")
+  {
+    if (threshold == 0)
+      threshold = 50;
+    else
+      threshold *= 10;
+  }
+  else if (gasType == "HCL")
+  {
+    if (threshold == 0)
+      threshold = 50;
+    else
+      threshold *= 10;
+  }
+  else if (gasType == "HF")
+  {
+    if (threshold == 0)
+      threshold = 30;
+    else
+      threshold *= 10;
+  }
+  else if (gasType == "CO")
+  {
+    if (threshold == 0)
+      threshold = 50;
+    else
+      threshold *= 1;
+  }
+  else if (gasType == "NH3")
+  {
+    if (threshold == 0)
+      threshold = 10;
+    else
+      threshold *= 1;
+  }
+  else if (gasType == "H2S")
+  {
+    if (threshold == 0)
+      threshold = 10;
+    else
+      threshold *= 1;
+  }
+  else if (gasType == "H2")
+  {
+    if (threshold == 0)
+      threshold = 50;
+    else
+      threshold *= 1;
+  }
+  else 
+    return ;
   uint8_t buf[6] = {0};
   uint8_t recvbuf[9] = {0};
   buf[0] = CMD_SET_THRESHOLD_ALARMS;
@@ -519,9 +625,11 @@ bool DFRobot_GAS_I2C::dataIsAvailable(void)
   sProtocol_t _protocol = pack(buf, sizeof(buf));
   writeData(0, (uint8_t *)&_protocol, sizeof(_protocol));
   readData(0, recvbuf, 9);
+  Serial.println("");
   if (recvbuf[8] != FucCheckSum(recvbuf, 8))
     return false;
-  else{
+  else
+  {
     memcpy((uint8_t *)&AllData, recvbuf, 9);
     analysisAllData();
     return true;

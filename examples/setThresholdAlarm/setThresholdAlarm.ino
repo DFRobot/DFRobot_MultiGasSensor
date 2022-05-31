@@ -75,7 +75,7 @@ void setup() {
   Serial.println("change acquire mode success!");
 
   //Set sensor alarm threshold
-  while (!gas.setThresholdAlarm(/*Whether to enable threshold alarm*/ gas.ON, 200, gas.LOW_THRESHOLD_ALA,gas.queryGasType()))
+  while (!gas.setThresholdAlarm(/*Whether to enable threshold alarm*/ gas.ON, /*取值为0时使用默认阈值*/20, gas.LOW_THRESHOLD_ALA,gas.queryGasType()))
   {
     Serial.println("Failed to open alarm!");
     delay(1000);

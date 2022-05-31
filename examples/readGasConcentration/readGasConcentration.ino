@@ -76,16 +76,20 @@ void setup() {
 }
 
 void loop() {
+  String gastype = gas.queryGasType();
   /**
    *Fill in the parameter readGasConcentration() with the type of gas to be obtained and print
    *The current gas concentration
    *Print with 1s delay each time
    */
   Serial.print("Ambient ");
-  Serial.print(gas.queryGasType());
+  Serial.print(gastype);
   Serial.print(" concentration is: ");
   Serial.print(gas.readGasConcentrationPPM());
-  Serial.println(" %vol");
+  if (gastype == "O2")
+    Serial.println(" %vol");
+  else
+    Serial.println(" PPM");
   Serial.println();
   delay(1000);
 }
