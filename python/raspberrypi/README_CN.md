@@ -4,9 +4,20 @@
 气体传感器广泛应用在气体研究，环境检测，生产安全监测，溶解气体分析，污染源/排放口规律研究，有毒有害，可燃气体检测报警，化验室或现场简单气体分析测试等方面，这款气体传感器更是集成了多种气体探头的一个多气体传感器，可以适用于各种各样的应用场景
 ![正反面svg效果图](../../resources/images/DFR0784.png)
 
-## 产品链接(https://www.dfrobot.com/)
+## 产品链接(https://www.dfrobot.com.cn/goods-3422.html)
 
-SKU：DFR0784
+  SKU:SEN0465
+  SKU:SEN0466
+  SKU:SEN0467
+  SKU:SEN0468
+  SKU:SEN0469
+  SKU:SEN0470
+  SKU:SEN0471
+  SKU:SEN0472
+  SKU:SEN0473
+  SKU:SEN0474
+  SKU:SEN0475
+  SKU:SEN0476
 
 ## 目录
 

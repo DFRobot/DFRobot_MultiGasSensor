@@ -4,9 +4,20 @@
 Gas sensors are widely applied to many fields such as gas research, environmental detection, production safety monitoring, dissolved gas analysis, pollution source/outlet law research, detection of toxic and harmful and combustible gas, laboratory or on-site simple gas analysis and testing, etc. This Multi-gas Sensor can be used with a variety of gas probes to detect hazardous gas concentration.
 ![正反面svg效果图](./resources/images/DFR0784.png)
 
-## Product Link(https://www.dfrobot.com/)
+## Product Link(https://www.dfrobot.com/product-2510.html)
 
-SKU：DFR0784
+  SKU:SEN0465
+  SKU:SEN0466
+  SKU:SEN0467
+  SKU:SEN0468
+  SKU:SEN0469
+  SKU:SEN0470
+  SKU:SEN0471
+  SKU:SEN0472
+  SKU:SEN0473
+  SKU:SEN0474
+  SKU:SEN0475
+  SKU:SEN0476
 
 ## Table of Contents
 
