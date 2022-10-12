@@ -521,7 +521,7 @@ bool DFRobot_GAS::setThresholdAlarm(eSwitch_t switchof, uint16_t threshold, eALA
       threshold *= 1;
   }
   else 
-    return ;
+    return false;
   uint8_t buf[6] = {0};
   uint8_t recvbuf[9] = {0};
   buf[0] = CMD_SET_THRESHOLD_ALARMS;
