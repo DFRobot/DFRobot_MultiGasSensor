@@ -152,7 +152,7 @@ NO2 O3 CL2 NH3 H2 HCL SO2 HF PH3等气体。只需要硬件切换对应
           OFF         ：关闭温度补偿
     @return 无
   '''
-  def set_temp_compensation(self,tempswitch):      
+  def set_temp_compensation(self,tempswitch):
 
   '''
     @brief 设置是否开启温度补偿，传感器在不同温度下的输出值会有差别，所以

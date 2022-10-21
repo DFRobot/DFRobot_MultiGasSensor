@@ -16,7 +16,7 @@ import spidev
 import os
 import math
 import RPi.GPIO as GPIO
-
+import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)  #Display all the print information
 #logger.setLevel(logging.FATAL)#Use this option if you don't want to display too many prints but only printing errors
@@ -27,7 +27,8 @@ logger.addHandler(ph)
 
 I2C_MODE  = 0x01
 UART_MODE = 0x02
-
+global sendbuf
+global recvbuf 
 sendbuf = [0]*9  
 recvbuf = [0]*9
 tempSwitch = 0
@@ -95,6 +96,7 @@ class DFRobot_MultiGasSensor(object):
         self.ser.open()  
         
   def __getitem__(self, k):
+    global recvbuf
     if k == recvbuf:
       return recvbuf
 
@@ -224,6 +226,8 @@ class DFRobot_MultiGasSensor(object):
       @retval True   change success
       @retval False  change fail
     '''
+    global sendbuf
+    global recvbuf
     sendbuf[0]=0xff
     sendbuf[1]=0x01
     sendbuf[2]=0x78
@@ -264,7 +268,7 @@ class DFRobot_MultiGasSensor(object):
     if(fuc_check_sum(recvbuf,8) == recvbuf[8]):
       Con=((recvbuf[2]<<8)+recvbuf[3])*1.0
     else:
-      return 0.0 
+      return 0.0
     #recv[4] Indicate probe type
     if recvbuf[4]==0x05:
       self.gastype = "O2"
@@ -389,6 +393,8 @@ class DFRobot_MultiGasSensor(object):
       @n  HF   0x33
       @n  PH3  0x45
     '''  
+    global sendbuf
+    global recvbuf
     clear_buffer(recvbuf,9)
     sendbuf[0]=0xff
     sendbuf[1]=0x01
@@ -399,9 +405,9 @@ class DFRobot_MultiGasSensor(object):
     sendbuf[6]=0x00
     sendbuf[7]=0x00
     sendbuf[8]=fuc_check_sum(sendbuf,8)
-    write_data(0,sendbuf,9)
+    self.write_data(0,sendbuf,9)
     time.sleep(0.1)
-    read_reg(0,recvbuf,9)
+    self.read_data(0,recvbuf,9)
     if(fuc_check_sum(recvbuf,8) == recvbuf[8]):
       return (recvbuf[4])
     else:
@@ -419,6 +425,8 @@ class DFRobot_MultiGasSensor(object):
       @retval True   change success
       @retval False  change fail
     '''  
+    global sendbuf
+    global recvbuf
     if (gasType == self.O2):
       threshold *= 10
     elif (gasType == self.NO2):
@@ -462,6 +470,8 @@ class DFRobot_MultiGasSensor(object):
       @brief Get sensor onboard temperature
       @return Board temperature, unit °C
     '''
+    global sendbuf
+    global recvbuf
     clear_buffer(recvbuf,9)
     sendbuf[0]=0xff
     sendbuf[1]=0x01
@@ -499,6 +509,8 @@ class DFRobot_MultiGasSensor(object):
       @param  vopin Pin for receiving the original voltage output from sensor probe
       @return The original voltage output of sensor gas concentration
     '''
+    global sendbuf
+    global recvbuf
     clear_buffer(recvbuf,9)
     sendbuf[0]=0xff
     sendbuf[1]=0x01
@@ -515,7 +527,7 @@ class DFRobot_MultiGasSensor(object):
     if (recvbuf[8] != fuc_check_sum(recvbuf, 8)):
       return 0.0
     else:
-      return (((recvbuf[2] << 8) + recvbuf[3])*3.0/1024*2);
+      return (((recvbuf[2] << 8) + recvbuf[3])*3.0/1024*2)
 
   def change_i2c_addr_group(self,group):
     '''!
@@ -557,6 +569,8 @@ class DFRobot_MultiGasSensor_I2C(DFRobot_MultiGasSensor):
       * @retval False  error is unavailable
       *
     ''' 
+    global sendbuf
+    global recvbuf
     clear_buffer(recvbuf,9)
     sendbuf[0]=0xff
     sendbuf[1]=0x01
@@ -570,6 +584,8 @@ class DFRobot_MultiGasSensor_I2C(DFRobot_MultiGasSensor):
     self.write_data(0,sendbuf,9)
     time.sleep(0.1)
     self.read_data(0,recvbuf,9)  
+    for i in range(0,8):
+      print("%#x"%recvbuf[i])
     if (recvbuf[8] == fuc_check_sum(recvbuf, 8)):
       self.analysis_all_data(recvbuf)
       return True
@@ -597,10 +613,11 @@ class DFRobot_MultiGasSensor_I2C(DFRobot_MultiGasSensor):
       @param reg register address
       @param value read data
     '''
+    global recvbuf
     try:
       rslt = self.i2cbus.read_i2c_block_data(self.__addr ,reg , length)
     except:
-      rslt = -1
+      rslt = 0
     recvbuf=rslt
     return length
     
@@ -615,21 +632,21 @@ class DFRobot_MultiGasSensor_UART(DFRobot_MultiGasSensor):
     except:
       print ("plese get root!")
     
-  def data_is_available(self):  
-    '''
-      *@brief Call this function in Uart active mode to determine the presence of data on data line
-      *@return Whether data from sensor is available
-      *@retval  True  success is Available
-      *@retval  False  error is unavailable
-    '''    
-    if(self.read_data(0,recvbuf,9)==9):
-      if(fuc_check_sum(recvbuf,8) == recvbuf[8]):
-        self.analysis_all_data(recvbuf)
-        return True
-      else:
-        return False
-    else:
-      return False
+  #def data_is_available(self):  
+  #  '''
+  #    *@brief Call this function in Uart active mode to determine the presence of data on data line
+  #    *@return Whether data from sensor is available
+  #    *@retval  True  success is Available
+  #    *@retval  False  error is unavailable
+  #  '''    
+  #  if(self.read_data(0,recvbuf,9)==9):
+  #    if(fuc_check_sum(recvbuf,8) == recvbuf[8]):
+  #      self.analysis_all_data(recvbuf)
+  #      return True
+  #    else:
+  #      return False
+  #  else:
+  #    return False
         
   def write_data(self, reg, data , length): 
     self.ser.write(data)
