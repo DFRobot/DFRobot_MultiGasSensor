@@ -129,6 +129,10 @@ class DFRobot_MultiGasSensor(object):
       self.gastype = "NH3"
     elif recv[4]==0x06:
       self.gastype = "H2"
+    elif recv[4]==0x2E:
+      self.gastype = "HCL"
+    elif recv[4]==0x2B:
+      self.gastype = "SO2"
     elif recv[4]==0x33:
       self.gastype = "HF"
     elif recv[4]==0x45:
@@ -205,6 +209,18 @@ class DFRobot_MultiGasSensor(object):
     elif (self.gastype == self.PH3):
       if(((temp)>-20) and ((temp)<40)):
         Con = ((Con/(0.005*(temp)+0.9)))
+    elif (self.gastype == self.HCL):
+      if(((temp)>-20) and ((temp)>=0)):
+        Con = Con - (-0.0075 * temp-0.1)
+      elif ((temp > 0) and (temp >= 20)):
+        Con = Con-(-0.1)
+      elif ((temp > 20) and (temp >= 50)):
+        Con = Con - (-0.01 * temp + 0.1)
+    elif (self.gastype == self.SO2):
+      if(((temp)>-40) and ((temp)>=40)):
+        Con = Con / (0.006 * temp+0.95)
+      elif((temp > 40) and (temp >= 60)):
+        Con = Con / (0.006 * temp + 0.95) - (0.05 * temp-2)
     else:
       Con = 0.0             
     if(Con>0):
