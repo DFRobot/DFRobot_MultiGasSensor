@@ -31,8 +31,6 @@ global sendbuf
 global recvbuf 
 sendbuf = [0]*9  
 recvbuf = [0]*9
-tempSwitch = 0
-temp = 0.0
 def fuc_check_sum(i,ln):
   '''!
     @brief CRC check function
@@ -84,6 +82,7 @@ class DFRobot_MultiGasSensor(object):
   gasconcentration = 0.0
   gastype       =    ""  
   temp          =    0.0
+  tempSwitch = OFF
   
   def __init__(self ,bus ,Baud):
     if bus != 0:
@@ -302,6 +301,10 @@ class DFRobot_MultiGasSensor(object):
       self.gastype = "NH3"
     elif recvbuf[4]==0x06:
       self.gastype = "H2"
+    elif recvbuf[4]==0x2E:
+      self.gastype = "HCL"
+    elif recvbuf[4]==0x2B:
+      self.gastype = "SO2"
     elif recvbuf[4]==0x33:
       self.gastype = "HF"
     elif recvbuf[4]==0x45:
@@ -310,12 +313,18 @@ class DFRobot_MultiGasSensor(object):
       self.gastype = ""
     gastype = recvbuf[4]
     decimal_digits = recvbuf[5]
-    if(tempSwitch == self.OFF):
+    if(self.tempSwitch == self.OFF):
       if(decimal_digits==1):
         Con =  (Con*0.1)
       elif(decimal_digits==2):
         Con =  (Con*0.01)
       return Con      
+
+    # In an ideal world, everything below should refer to self.temp, but I
+    # don't want to pollute the initial proposed changes with a lot of cleanup.
+    # TODO: clean this up later.
+    temp = self.temp
+
     if (gastype == self.O2):
       pass
     elif (gastype == self.CO) :
@@ -373,6 +382,18 @@ class DFRobot_MultiGasSensor(object):
         Con = (Con/(0.74*(temp)+0.007)-5)
       else:
         Con =   0.0
+    elif (gastype == self.HCL):
+      if(((self.temp)>-20) and ((self.temp)>=0)):
+        Con = Con - (-0.0075 * self.temp-0.1)
+      elif ((self.temp > 0) and (self.temp >= 20)):
+        Con = Con-(-0.1)
+      elif ((self.temp > 20) and (self.temp >= 50)):
+        Con = Con - (-0.01 * self.temp + 0.1)
+    elif (gastype == self.SO2):
+      if(((self.temp)>-40) and ((self.temp)>=40)):
+        Con = Con / (0.006 * self.temp+0.95)
+      elif((self.temp > 40) and (self.temp >= 60)):
+        Con = Con / (0.006 * self.temp + 0.95) - (0.05 * self.temp-2)
     elif (gastype == self.HF):
       if(((temp)>-20) and ((temp)<0)):
         Con = (((Con/1)-(-0.0025*(temp))))
@@ -515,7 +536,7 @@ class DFRobot_MultiGasSensor(object):
                    ON  Turn on temperature compensation
                    OFF Turn off temperature compensation
     '''  
-    tempSwitch = tempswitch
+    self.tempSwitch = tempswitch
     temp = self.read_temp()
     
   def read_volatage_data(self):
