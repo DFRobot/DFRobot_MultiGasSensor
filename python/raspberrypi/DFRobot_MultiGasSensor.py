@@ -138,6 +138,12 @@ class DFRobot_MultiGasSensor(object):
       self.gastype = "PH3"
     else:
       self.gastype =""
+
+    # In an ideal world, everything below should refer to self.temp, but I
+    # don't want to pollute the initial proposed changes with a lot of cleanup.
+    # TODO: clean this up later.
+    temp = self.temp
+
     Con = self.gasconcentration  
     if (self.gastype == self.O2):
       pass
@@ -319,6 +325,9 @@ class DFRobot_MultiGasSensor(object):
       elif(decimal_digits==2):
         Con =  (Con*0.01)
       return Con      
+    else:
+      # Temperature correction is enabled. Update temperature measurement.
+      self.temp = self.read_temp()
 
     # In an ideal world, everything below should refer to self.temp, but I
     # don't want to pollute the initial proposed changes with a lot of cleanup.
