@@ -282,6 +282,11 @@ class DFRobot_MultiGasSensor(object):
     else: # Do not modify values for unknown sensors.
       pass
 
+    # No sensor measurements are ever below zero, so it makes little sense
+    # for the corrected version to be so.
+    if Con < 0:
+      return 0.0
+
     return Con
 
 
@@ -364,30 +369,29 @@ class DFRobot_MultiGasSensor(object):
     self.read_data(0,recvbuf,9)
     if(fuc_check_sum(recvbuf,8) == recvbuf[8]):
       Con=((recvbuf[2]<<8)+recvbuf[3])*1.0
-    else:
+
+      # Scale measurement based on the number of decimal places indicated
+      # by the sensor.
+      decimal_digits = recvbuf[5]
+      if decimal_digits == 1:
+        Con = Con * 0.1
+      elif decimal_digits == 2:
+        Con = Con * 0.01
+
+    else: # Checksum failed.
       return 0.0
 
     # Update sensor type from info in response (byte 4).
     self.__set_gastype(recvbuf[4])
 
-    decimal_digits = recvbuf[5]
-    if(self.tempSwitch == self.OFF):
-      if(decimal_digits==1):
-        Con =  (Con*0.1)
-      elif(decimal_digits==2):
-        Con =  (Con*0.01)
-      return Con      
-    else:
-      # Temperature correction is enabled. Update temperature measurement.
+    # Update temperature measurement if temperature correction is enabled.
+    if(self.tempSwitch == self.ON):
       self.temp = self.read_temp()
 
     # Perform temperature correction of the value if enabled.
     Con = self.__temp_correction(self.gasconcentration)
 
-    if(Con<0):
-      return 0
-    else:
-      return Con     
+    return Con
 
   def read_gas_type(self):
     '''!
