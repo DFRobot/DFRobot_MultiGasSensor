@@ -53,6 +53,27 @@ def clear_buffer(buf,length):
   for i in range(0,length):
     buf[i]=0
 
+
+class DFRobot_GasType:
+  '''!
+    @brief Enumerates all known sensor types. DFRobot_MultiGasSensor.gastype
+    @n     will be set to one of these.
+  '''
+  O2  = "O2"
+  CO  = "CO"
+  H2S = "H2S"
+  NO2 = "NO2"
+  O3  = "O3"
+  CL2 = "CL2"
+  NH3 = "NH3"
+  H2  = "H2"
+  HCL = "HCL"
+  SO2 = "SO2"
+  HF  = "HF"
+  PH3 = "PH3"
+  UNKNOWN = ""
+
+
 class DFRobot_MultiGasSensor(object):
   '''!
     @brief This is a sensor parent class which can be used in complex environments to detect various gases.
@@ -99,6 +120,40 @@ class DFRobot_MultiGasSensor(object):
     if k == recvbuf:
       return recvbuf
 
+
+  def __set_gastype(self, probe_type):
+    '''!
+      @brief   Sets instance gas type based on type read from sensor.
+      @param probe_type Byte received from sensor indicating sensor type.
+    '''
+    if probe_type == self.O2:
+      self.gastype = DFRobot_GasType.O2
+    elif probe_type == self.CO:
+      self.gastype = DFRobot_GasType.CO
+    elif probe_type == self.H2S:
+      self.gastype = DFRobot_GasType.H2S
+    elif probe_type == self.NO2:
+      self.gastype = DFRobot_GasType.NO2
+    elif probe_type == self.O3:
+      self.gastype = DFRobot_GasType.O3
+    elif probe_type == self.CL2:
+      self.gastype = DFRobot_GasType.CL2
+    elif probe_type == self.NH3:
+      self.gastype = DFRobot_GasType.NH3
+    elif probe_type == self.H2:
+      self.gastype = DFRobot_GasType.H2
+    elif probe_type == self.HCL:
+      self.gastype = DFRobot_GasType.HCL
+    elif probe_type == self.SO2:
+      self.gastype = DFRobot_GasType.SO2
+    elif probe_type == self.HF:
+      self.gastype = DFRobot_GasType.HF
+    elif probe_type == self.PH3:
+      self.gastype = DFRobot_GasType.PH3
+    else:
+      self.gastype =DFRobot_GasType.UNKNOWN
+
+
   def analysis_all_data(self,recv):
     '''!
       @brief   The obtained data list by parsing.
@@ -111,33 +166,9 @@ class DFRobot_MultiGasSensor(object):
       self.gasconcentration = 0.1*((recv[2] << 8) + recv[3])
     elif(recv[5]==2):
       self.gasconcentration = 0.01*((recv[2] << 8) + recv[3]) 
-    #recv[4]Indicate probe type
-    if recv[4]==0x05:
-      self.gastype = "O2"
-    elif recv[4]==0x04:
-      self.gastype = "CO"
-    elif recv[4]==0x03:
-      self.gastype = "H2S"
-    elif recv[4]==0x2C:
-      self.gastype = "NO2"
-    elif recv[4]==0x2A:
-      self.gastype = "O3"
-    elif recv[4]==0x31:
-      self.gastype = "CL2"
-    elif recv[4]==0x02:
-      self.gastype = "NH3"
-    elif recv[4]==0x06:
-      self.gastype = "H2"
-    elif recv[4]==0x2E:
-      self.gastype = "HCL"
-    elif recv[4]==0x2B:
-      self.gastype = "SO2"
-    elif recv[4]==0x33:
-      self.gastype = "HF"
-    elif recv[4]==0x45:
-      self.gastype = "PH3"
-    else:
-      self.gastype =""
+
+    # Update sensor type from info in response (byte 4).
+    self.__set_gastype(recv[4])
 
     # In an ideal world, everything below should refer to self.temp, but I
     # don't want to pollute the initial proposed changes with a lot of cleanup.
@@ -145,23 +176,23 @@ class DFRobot_MultiGasSensor(object):
     temp = self.temp
 
     Con = self.gasconcentration  
-    if (self.gastype == self.O2):
+    if self.gastype == DFRobot_GasType.O2:
       pass
-    elif (self.gastype == self.CO) :
+    elif self.gastype == DFRobot_GasType.CO:
       if(((temp)>-20) and ((temp)<20)):
         Con = (Con/(0.005*(temp)+0.9))
       elif (((temp)>20) and ((temp)<40)):
         Con = (Con/(0.005*(temp)+0.9)-(0.3*(temp)-6))
       else:
         Con = 0.0
-    elif (self.gastype == self.H2S):
+    elif self.gastype == DFRobot_GasType.H2S:
       if(((temp)>-20) and ((temp)<20)):
         Con = (Con/(0.006*(temp)+0.92))
       elif (((temp)>20) and ((temp)<40)):
         Con = (Con/(0.006*(temp)+0.92)-(0.015*(temp)+2.4))
       else :
         Con = 0.0
-    elif (self.gastype == self.NO2):
+    elif self.gastype == DFRobot_GasType.NO2:
       if(((temp)>-20) and ((temp)<0)):
         Con = ((Con/(0.005*(temp)+0.9)-(-0.0025*(temp))))
       elif (((temp)>0) and ((temp)<20)):
@@ -170,7 +201,7 @@ class DFRobot_MultiGasSensor(object):
         Con = ((Con/(0.005*(temp)+0.9)-(0.0025*(temp)+0.1)))
       else :
         Con =   0.0
-    elif (self.gastype == self.O3):
+    elif self.gastype == DFRobot_GasType.O3:
       if(((temp)>-20) and ((temp)<0)):
         Con = ((Con/(0.015*(temp)+1.1)-0.05))
       elif (((temp)>0) and ((temp)<20)):
@@ -179,7 +210,7 @@ class DFRobot_MultiGasSensor(object):
         Con = ((Con/1.1-(-0.05*(temp)+0.3)))
       else :
          Con = 0.0
-    elif (self.gastype == self.CL2):
+    elif self.gastype == DFRobot_GasType.CL2:
       if(((temp)>-20) and ((temp)<0)):
         Con = ((Con/(0.015*(temp)+1.1)-(-0.0025*(temp))))
       elif (((temp)>0) and ((temp)<20)):
@@ -188,7 +219,7 @@ class DFRobot_MultiGasSensor(object):
         Con = ((Con/1.1-(0.06*(temp)-0.12)))
       else:
         Con = 0.0
-    elif (self.gastype ==self.NH3):
+    elif self.gastype == DFRobot_GasType.NH3:
       if(((temp)>-20) and ((temp)<0)):
         Con = (Con/(0.08*(temp)+3.98)-(-0.005*(temp)+0.3))
       elif (((temp)>0) and ((temp)<20)):
@@ -197,12 +228,12 @@ class DFRobot_MultiGasSensor(object):
         Con = (Con/(0.004*(temp)+1.08)-(-0.1*(temp)+2))
       else:
         Con = 0.0
-    elif (self.gastype == self.H2):
+    elif self.gastype == DFRobot_GasType.H2:
       if(((temp)>-20) and ((temp)<40)):
         Con = (Con/(0.74*(temp)+0.007)-5)
       else:
         Con =   0.0
-    elif (self.gastype == self.HF):
+    elif self.gastype == DFRobot_GasType.HF:
       if(((temp)>-20) and ((temp)<0)):
         Con = (((Con/1)-(-0.0025*(temp))))
       elif (((temp)>0) and ((temp)<20)):
@@ -211,17 +242,17 @@ class DFRobot_MultiGasSensor(object):
         Con = ((Con/1-(0.0375*(temp)-0.85)))
       else :
         Con = 0.0
-    elif (self.gastype == self.PH3):
+    elif self.gastype == DFRobot_GasType.PH3:
       if(((temp)>-20) and ((temp)<40)):
         Con = ((Con/(0.005*(temp)+0.9)))
-    elif (self.gastype == self.HCL):
+    elif self.gastype == DFRobot_GasType.HCL:
       if(((temp)>-20) and ((temp)>=0)):
         Con = Con - (-0.0075 * temp-0.1)
       elif ((temp > 0) and (temp >= 20)):
         Con = Con-(-0.1)
       elif ((temp > 20) and (temp >= 50)):
         Con = Con - (-0.01 * temp + 0.1)
-    elif (self.gastype == self.SO2):
+    elif self.gastype == DFRobot_GasType.SO2:
       if(((temp)>-40) and ((temp)>=40)):
         Con = Con / (0.006 * temp+0.95)
       elif((temp > 40) and (temp >= 60)):
@@ -290,34 +321,10 @@ class DFRobot_MultiGasSensor(object):
       Con=((recvbuf[2]<<8)+recvbuf[3])*1.0
     else:
       return 0.0
-    #recv[4] Indicate probe type
-    if recvbuf[4]==0x05:
-      self.gastype = "O2"
-    elif recvbuf[4]==0x04:
-      self.gastype = "CO"
-    elif recvbuf[4]==0x03:
-      self.gastype = "H2S"
-    elif recvbuf[4]==0x2C:
-      self.gastype = "NO2"
-    elif recvbuf[4]==0x2A:
-      self.gastype = "O3"
-    elif recvbuf[4]==0x31:
-      self.gastype = "CL2"
-    elif recvbuf[4]==0x02:
-      self.gastype = "NH3"
-    elif recvbuf[4]==0x06:
-      self.gastype = "H2"
-    elif recvbuf[4]==0x2E:
-      self.gastype = "HCL"
-    elif recvbuf[4]==0x2B:
-      self.gastype = "SO2"
-    elif recvbuf[4]==0x33:
-      self.gastype = "HF"
-    elif recvbuf[4]==0x45:
-      self.gastype = "PH3"
-    else:
-      self.gastype = ""
-    gastype = recvbuf[4]
+
+    # Update sensor type from info in response (byte 4).
+    self.__set_gastype(recvbuf[4])
+
     decimal_digits = recvbuf[5]
     if(self.tempSwitch == self.OFF):
       if(decimal_digits==1):
@@ -334,23 +341,23 @@ class DFRobot_MultiGasSensor(object):
     # TODO: clean this up later.
     temp = self.temp
 
-    if (gastype == self.O2):
+    if self.gastype == DFRobot_GasType.O2:
       pass
-    elif (gastype == self.CO) :
+    elif self.gastype == DFRobot_GasType.CO:
       if(((temp)>-20) and ((temp)<20)):
         Con = (Con/(0.005*(temp)+0.9))
       elif (((temp)>20) and ((temp)<40)):
         Con = (Con/(0.005*(temp)+0.9)-(0.3*(temp)-6))
       else:
         Con = 0.0
-    elif (gastype == self.H2S):
+    elif self.gastype == DFRobot_GasType.H2S:
       if(((temp)>-20) and ((temp)<20)):
         Con = (Con/(0.006*(temp)+0.92))
       elif (((temp)>20) and ((temp)<40)):
         Con = (Con/(0.006*(temp)+0.92)-(0.015*(temp)+2.4))
       else :
         Con = 0.0
-    elif (gastype == self.NO2):
+    elif self.gastype == DFRobot_GasType.NO2:
       if(((temp)>-20) and ((temp)<0)):
         Con = ((Con/(0.005*(temp)+0.9)-(-0.0025*(temp))))
       elif (((temp)>0) and ((temp)<20)):
@@ -359,7 +366,7 @@ class DFRobot_MultiGasSensor(object):
         Con = ((Con/(0.005*(temp)+0.9)-(0.0025*(temp)+0.1)))
       else :
         Con =   0.0
-    elif (gastype == self.O3):
+    elif self.gastype == DFRobot_GasType.O3:
       if(((temp)>-20) and ((temp)<0)):
         Con = ((Con/(0.015*(temp)+1.1)-0.05))
       elif (((temp)>0) and ((temp)<20)):
@@ -368,7 +375,7 @@ class DFRobot_MultiGasSensor(object):
         Con = ((Con/1.1-(-0.05*(temp)+0.3)))
       else :
          Con = 0.0
-    elif (gastype == self.CL2):
+    elif self.gastype == DFRobot_GasType.CL2:
       if(((temp)>-20) and ((temp)<0)):
         Con = ((Con/(0.015*(temp)+1.1)-(-0.0025*(temp))))
       elif (((temp)>0) and ((temp)<20)):
@@ -377,7 +384,7 @@ class DFRobot_MultiGasSensor(object):
         Con = ((Con/1.1-(0.06*(temp)-0.12)))
       else:
         Con = 0.0
-    elif (gastype ==self.NH3):
+    elif self.gastype == DFRobot_GasType.NH3:
       if(((temp)>-20) and ((temp)<0)):
         Con = (Con/(0.08*(temp)+3.98)-(-0.005*(temp)+0.3))
       elif (((temp)>0) and ((temp)<20)):
@@ -386,24 +393,24 @@ class DFRobot_MultiGasSensor(object):
         Con = (Con/(0.004*(temp)+1.08)-(-0.1*(temp)+2))
       else:
         Con = 0.0
-    elif (gastype == self.H2):
+    elif self.gastype == DFRobot_GasType.H2:
       if(((temp)>-20) and ((temp)<40)):
         Con = (Con/(0.74*(temp)+0.007)-5)
       else:
         Con =   0.0
-    elif (gastype == self.HCL):
+    elif self.gastype == DFRobot_GasType.HCL:
       if(((self.temp)>-20) and ((self.temp)>=0)):
         Con = Con - (-0.0075 * self.temp-0.1)
       elif ((self.temp > 0) and (self.temp >= 20)):
         Con = Con-(-0.1)
       elif ((self.temp > 20) and (self.temp >= 50)):
         Con = Con - (-0.01 * self.temp + 0.1)
-    elif (gastype == self.SO2):
+    elif self.gastype == DFRobot_GasType.SO2:
       if(((self.temp)>-40) and ((self.temp)>=40)):
         Con = Con / (0.006 * self.temp+0.95)
       elif((self.temp > 40) and (self.temp >= 60)):
         Con = Con / (0.006 * self.temp + 0.95) - (0.05 * self.temp-2)
-    elif (gastype == self.HF):
+    elif self.gastype == DFRobot_GasType.HF:
       if(((temp)>-20) and ((temp)<0)):
         Con = (((Con/1)-(-0.0025*(temp))))
       elif (((temp)>0) and ((temp)<20)):
@@ -412,7 +419,7 @@ class DFRobot_MultiGasSensor(object):
         Con = ((Con/1-(0.0375*(temp)-0.85)))
       else :
         Con = 0.0
-    elif (gastype == self.PH3):
+    elif self.gastype == DFRobot_GasType.PH3:
       if(((temp)>-20) and ((temp)<40)):
         Con = ((Con/(0.005*(temp)+0.9)))
     else:
@@ -473,21 +480,21 @@ class DFRobot_MultiGasSensor(object):
     '''  
     global sendbuf
     global recvbuf
-    if (gasType == self.O2):
+    if self.gastype == DFRobot_GasType.O2:
       threshold *= 10
-    elif (gasType == self.NO2):
+    elif self.gastype == DFRobot_GasType.NO2:
       threshold *= 10
-    elif (gasType == self.O3):
+    elif self.gastype == DFRobot_GasType.O3:
       threshold *= 10
-    elif (gasType == self.CL2):
+    elif self.gastype == DFRobot_GasType.CL2:
       threshold *= 10
-    elif (gasType == self.HCL):
+    elif self.gastype == DFRobot_GasType.HCL:
       threshold *= 10
-    elif (gasType == self.SO2):
+    elif self.gastype == DFRobot_GasType.SO2:
       threshold *= 10
-    elif (gasType == self.HF):
+    elif self.gastype == DFRobot_GasType.HF:
       threshold *= 10
-    elif (gasType == self.PH3):
+    elif self.gastype == DFRobot_GasType.PH3:
       threshold *= 10
     global sendbuf
     global recvbuf  
