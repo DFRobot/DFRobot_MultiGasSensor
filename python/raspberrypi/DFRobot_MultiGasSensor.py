@@ -158,103 +158,126 @@ class DFRobot_MultiGasSensor(object):
     '''!
       @brief Performs temperature correction of sensor value.
       @param Con Measured value from sensor.
-    '''    
+    '''
+
+    # TODO: restructure all of the checks below to stop repeatedly checking
+    # against the same tresholds over and over. This would be more efficient
+    # and way more readable if all of the checks followed the pattern:
+    #
+    # if self.temp < threshold_1:
+    #   Con = 0.0
+    # elif self.temp < threshold_2:
+    #   Con = some sort of correction
+    # elif self.temp < theshold_3:
+    #   Con = another correction
+    # else:
+    #   Con = 0.0
+    
     # If temperature corrections not enabled, don't alter the sensor value.
     if self.tempSwitch != self.ON:
       return Con
 
     if self.gastype == DFRobot_GasType.O2:
+      # No temperature dependency.
       pass
 
     elif self.gastype == DFRobot_GasType.CO:
-      if (self.temp>-20) and (self.temp<20):
-        Con = (Con/(0.005*self.temp+0.9))
-      elif (self.temp>20) and (self.temp<40):
-        Con = (Con/(0.005*self.temp+0.9)-(0.3*self.temp-6))
+      if (self.temp > -40) and (self.temp <= 20):
+        Con = Con / (0.005 * self.temp + 0.9)
+      elif (self.temp > 20) and (self.temp <= 40):
+        Con = Con / (0.005 * self.temp + 0.9) - (0.3 *self.temp - 6)
       else:
         Con = 0.0
 
     elif self.gastype == DFRobot_GasType.H2S:
-      if (self.temp>-20) and (self.temp<20):
-        Con = (Con/(0.006*self.temp+0.92))
-      elif (self.temp>20) and (self.temp<40):
-        Con = (Con/(0.006*self.temp+0.92)-(0.015*self.temp+2.4))
-      else :
+      if (self.temp > -20) and (self.temp <= 20):
+        Con = Con / (0.005 * self.temp + 0.92)
+      elif (self.temp > 20) and (self.temp <= 60):
+        Con = Con - (0.015 * self.temp - 0.3);
+      else:
         Con = 0.0
 
     elif self.gastype == DFRobot_GasType.NO2:
-      if (self.temp>-20) and (self.temp<0):
-        Con = ((Con/(0.005*self.temp+0.9)-(-0.0025*self.temp)))
-      elif (self.temp>0) and (self.temp<20):
-        Con = ((Con/(0.005*self.temp+0.9)-(0.005*self.temp+0.005)))
-      elif (self.temp>20) and (self.temp<40):
-        Con = ((Con/(0.005*self.temp+0.9)-(0.0025*self.temp+0.1)))
+      if (self.temp > -20) and (self.temp <= 0):
+        Con = Con / (0.005 * self.temp + 0.9) - (-0.0025 * self.temp + 0.005)
+      elif (self.temp > 0) and (self.temp <= 20):
+        Con = Con / (0.005 * self.temp + 0.9) - (0.005 * self.temp + 0.005)
+      elif (self.temp > 20) and (self.temp <= 40):
+        Con = Con / (0.005 * self.temp + 0.9) - (0.0025 * self.temp + 0.3)
+      elif (self.temp > 40) and (self.temp < 50):
+        Con = Con / (0.005 * self.temp + 0.9) - (-0.048 * self.temp -0.92)
       else :
         Con =   0.0
 
     elif self.gastype == DFRobot_GasType.O3:
-      if (self.temp>-20) and (self.temp<0):
-        Con = ((Con/(0.015*self.temp+1.1)-0.05))
-      elif (self.temp>0) and (self.temp<20):
-        Con = ((Con/1.1-(0.01*self.temp)))
-      elif (self.temp>20) and (self.temp<40):
-        Con = ((Con/1.1-(-0.05*self.temp+0.3)))
-      else :
+      if (self.temp > -20) and (self.temp <= 0):
+        Con = Con / (0.015 * self.temp + 1.1) - 0.05
+      elif (self.temp > 0) and (self.temp <= 20):
+        Con = Con - (0.01 * self.temp)
+      elif (self.temp > 20) and (self.temp <= 40):
+        Con = Con - (0.005 * self.temp + 0.4)
+      elif (self.temp > 40) and (self.temp < 50):
+        Con = Con - (0.007 * self.temp - 1.68)
+      else:
          Con = 0.0
 
     elif self.gastype == DFRobot_GasType.CL2:
-      if (self.temp>-20) and (self.temp<0):
-        Con = ((Con/(0.015*self.temp+1.1)-(-0.0025*self.temp)))
-      elif (self.temp>0) and (self.temp<20):
-        Con = ((Con/1.1-0.005*self.temp))
-      elif (self.temp>20) and (self.temp<40):
-        Con = ((Con/1.1-(0.06*self.temp-0.12)))
+      if (self.temp > -20) and (self.temp <= 0):
+        Con = Con / (0.015 * self.temp + 1.1) -0.0025
+      elif (self.temp > 0) and (self.temp <= 20):
+        Con = Con / 1.1 - 0.005 * self.temp
+      elif (self.temp > 20) and (self.temp < 40):
+        Con = Con - (-0.005 * self.temp + 0.3)
       else:
         Con = 0.0
 
     elif self.gastype == DFRobot_GasType.NH3:
-      if (self.temp>-20) and (self.temp<0):
-        Con = (Con/(0.08*self.temp+3.98)-(-0.005*self.temp+0.3))
-      elif (self.temp>0) and (self.temp<20):
-        Con = (Con/(0.08*self.temp+3.98)-(-0.005*self.temp+0.3))
-      elif (self.temp>20) and (self.temp<40):
-        Con = (Con/(0.004*self.temp+1.08)-(-0.1*self.temp+2))
+      if (self.temp > -20) and (self.temp <= 0):
+        Con = Con / (0.006 * self.temp + 0.95) - (-0.006 * self.temp + 0.25)
+      elif (self.temp > 0) and (self.temp <= 20):
+        Con = Con / (0.006 * self.temp + 0.95) - (-0.012 * self.temp + 0.25)
+      elif (self.temp > 20) and (self.temp < 40):
+        Con = Con / (0.005 * self.temp + 1.08) - (-0.1 * self.temp + 2)
       else:
         Con = 0.0
 
     elif self.gastype == DFRobot_GasType.H2:
-      if (self.temp>-20) and (self.temp<40):
-        Con = (Con/(0.74*self.temp+0.007)-5)
+      if (self.temp > -20) and (self.temp <= 20):
+        Con = Con / (0.0074 * self.temp + 0.7) - 5
+      if (self.temp > 20) and (self.temp <= 40):
+        Con = Con / (0.025 * self.temp + 0.3) - 5
+      if (self.temp > 40) and (self.temp <= 60):
+        Con = Con / (0.001 * self.temp + 0.9) - (0.75 * self.temp-25)
       else:
-        Con =   0.0
-
-    elif self.gastype == DFRobot_GasType.HF:
-      if (self.temp>-20) and (self.temp<0):
-        Con = (((Con/1)-(-0.0025*self.temp)))
-      elif (self.temp>0) and (self.temp<20):
-        Con = ((Con/1+0.1))
-      elif (self.temp>20) and (self.temp<40):
-        Con = ((Con/1-(0.0375*self.temp-0.85)))
-      else :
         Con = 0.0
 
-    elif self.gastype == DFRobot_GasType.PH3:
-      if (self.temp>-20) and (self.temp<40):
-        Con = ((Con/(0.005*self.temp+0.9)))
-
     elif self.gastype == DFRobot_GasType.HCL:
-      if (self.temp>-20) and (self.temp>=0):
-        Con = Con - (-0.0075 * temp-0.1)
-      elif (self.temp > 0) and (self.temp >= 20):
-        Con = Con-(-0.1)
-      elif (self.temp > 20) and (self.temp >= 50):
+      if (self.temp > -20) and (self.temp <= 0):
+        Con = Con - (-0.0075 * self.temp - 0.1)
+      elif (self.temp > 0) and (self.temp <= 20):
+        Con = Con - (-0.1)
+      elif (self.temp > 20) and (self.temp < 50):
         Con = Con - (-0.01 * self.temp + 0.1)
 
     elif self.gastype == DFRobot_GasType.SO2:
-      if (self.temp>-40) and (self.temp>=40):
-        Con = Con / (0.006 * self.temp+0.95)
-      elif (self.temp > 40) and (self.temp >= 60):
-        Con = Con / (0.006 * self.temp + 0.95) - (0.05 * self.temp-2)
+      if (self.temp >- 40) and (self.temp <= 40):
+        Con = Con / (0.006 * self.temp + 0.95)
+      elif (self.temp > 40) and (self.temp <= 60):
+        Con = Con / (0.006 * self.temp + 0.95) - (0.05 * self.temp - 2)
+
+    elif self.gastype == DFRobot_GasType.HF:
+      if (self.temp > -20) and (self.temp <= 0):
+        Con = Con/1 - (-0.0025 * self.temp)
+      elif (self.temp > 0) and (self.temp <= 20):
+        Con = Con/1 + 0.1
+      elif (self.temp>20) and (self.temp < 40):
+        Con = Con / 1 - (0.01 * self.temp - 0.85)
+      else:
+        Con = 0.0
+
+    elif self.gastype == DFRobot_GasType.PH3:
+      if (self.temp > -20) and (self.temp < 40):
+        Con = Con / (0.005 * self.temp + 0.9)
 
     else: # Do not modify values for unknown sensors.
       pass
