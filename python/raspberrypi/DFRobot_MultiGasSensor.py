@@ -167,6 +167,16 @@ class DFRobot_MultiGasSensor(object):
       self.gasunits = ""
 
 
+  def __adc_to_temp(self, temp_ADC):
+    '''!
+      @brief Converts temperature ADC measurement to temperature.
+      @param temp_ADC 10-bit A/D measurement from onboard temperature sensor.
+    '''
+    Vpd3=float(temp_ADC/1024.0)*3
+    Rth = Vpd3*10000/(3-Vpd3)
+    return 1/(1/(273.15+25)+1/3380.13*(math.log(Rth/10000)))-273.15
+
+
   def __temp_correction(self, Con):
     '''!
       @brief Performs temperature correction of sensor value.
@@ -324,13 +334,13 @@ class DFRobot_MultiGasSensor(object):
     # Update sensor type from info in response (byte 4).
     self.__set_gastype(recv[4])
 
+    # Update current temperature.
+    temp_ADC=(recv[6]<<8)+recv[7]
+    self.temp = self.__adc_to_temp(temp_ADC)
+
     # Perform temperature correction of the value if enabled.
     Con = self.__temp_correction(self.gasconcentration)
 
-    temp_ADC=(recv[6]<<8)+recv[7] 
-    Vpd3=float(temp_ADC/1024.0)*3
-    Rth = Vpd3*10000/(3-Vpd3)
-    self.temp = 1/(1/(273.15+25)+1/3380.13*(math.log(Rth/10000)))-273.15     
     
   def change_acquire_mode(self,mode):
     '''!
@@ -517,10 +527,7 @@ class DFRobot_MultiGasSensor(object):
     time.sleep(0.1)
     self.read_data(0,recvbuf,9)
     temp_ADC=(recvbuf[2]<<8)+recvbuf[3]
-    Vpd3=float(temp_ADC/1024.0)*3
-    Rth = Vpd3*10000/(3-Vpd3)
-    Tbeta = 1/(1/(273.15+25)+1/3380.13*(math.log(Rth/10000)))-273.15
-    return Tbeta
+    return self.__adc_to_temp(temp_ADC)
     
   def set_temp_compensation(self,tempswitch):
     '''!
