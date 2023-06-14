@@ -100,8 +100,9 @@ class DFRobot_MultiGasSensor(object):
   GASKIND    =  0x01
   ON         =  0x01
   OFF        =  0x00
-  gasconcentration = 0.0
-  gastype       =    ""  
+  gasconcentration = 0.0 # Raw, uncorrected sensor measurement.
+  gastype       =    ""
+  gasunits      =    ""
   temp          =    0.0
   tempSwitch = OFF
   
@@ -123,35 +124,47 @@ class DFRobot_MultiGasSensor(object):
 
   def __set_gastype(self, probe_type):
     '''!
-      @brief   Sets instance gas type based on type read from sensor.
+      @brief   Sets instance gas type and units based on type read from sensor.
       @param probe_type Byte received from sensor indicating sensor type.
     '''
     if probe_type == self.O2:
       self.gastype = DFRobot_GasType.O2
+      self.gasunits = "%%"
     elif probe_type == self.CO:
       self.gastype = DFRobot_GasType.CO
+      self.gasunits = "ppm"
     elif probe_type == self.H2S:
       self.gastype = DFRobot_GasType.H2S
     elif probe_type == self.NO2:
+      self.gasunits = "ppm"
       self.gastype = DFRobot_GasType.NO2
     elif probe_type == self.O3:
+      self.gasunits = "ppm"
       self.gastype = DFRobot_GasType.O3
     elif probe_type == self.CL2:
+      self.gasunits = "ppm"
       self.gastype = DFRobot_GasType.CL2
     elif probe_type == self.NH3:
+      self.gasunits = "ppm"
       self.gastype = DFRobot_GasType.NH3
     elif probe_type == self.H2:
       self.gastype = DFRobot_GasType.H2
+      self.gasunits = "ppm"
     elif probe_type == self.HCL:
       self.gastype = DFRobot_GasType.HCL
+      self.gasunits = "ppm"
     elif probe_type == self.SO2:
       self.gastype = DFRobot_GasType.SO2
+      self.gasunits = "ppm"
     elif probe_type == self.HF:
       self.gastype = DFRobot_GasType.HF
+      self.gasunits = "ppm"
     elif probe_type == self.PH3:
       self.gastype = DFRobot_GasType.PH3
+      self.gasunits = "ppm"
     else:
       self.gastype =DFRobot_GasType.UNKNOWN
+      self.gasunits = ""
 
 
   def __temp_correction(self, Con):
@@ -159,6 +172,11 @@ class DFRobot_MultiGasSensor(object):
       @brief Performs temperature correction of sensor value.
       @param Con Measured value from sensor.
     '''
+
+    # NOTE: this implementation replicates the thresholds and corrections
+    # from the C++ version of the library as of commit 54e465b. The python
+    # version was significantly different in many ways, resulting in different
+    # results based on which library is used.
 
     # TODO: restructure all of the checks below to stop repeatedly checking
     # against the same tresholds over and over. This would be more efficient
@@ -301,7 +319,7 @@ class DFRobot_MultiGasSensor(object):
     elif(recv[5]==1):
       self.gasconcentration = 0.1*((recv[2] << 8) + recv[3])
     elif(recv[5]==2):
-      self.gasconcentration = 0.01*((recv[2] << 8) + recv[3]) 
+      self.gasconcentration = 0.01*((recv[2] << 8) + recv[3])
 
     # Update sensor type from info in response (byte 4).
     self.__set_gastype(recv[4])
@@ -309,10 +327,6 @@ class DFRobot_MultiGasSensor(object):
     # Perform temperature correction of the value if enabled.
     Con = self.__temp_correction(self.gasconcentration)
 
-    if(Con>0):
-      self.gasconcentration = Con
-    else:
-      self.gasconcentration = 0
     temp_ADC=(recv[6]<<8)+recv[7] 
     Vpd3=float(temp_ADC/1024.0)*3
     Rth = Vpd3*10000/(3-Vpd3)
@@ -368,15 +382,15 @@ class DFRobot_MultiGasSensor(object):
     time.sleep(0.1)
     self.read_data(0,recvbuf,9)
     if(fuc_check_sum(recvbuf,8) == recvbuf[8]):
-      Con=((recvbuf[2]<<8)+recvbuf[3])*1.0
+      self.gasconcentration = ((recvbuf[2]<<8)+recvbuf[3])*1.0
 
       # Scale measurement based on the number of decimal places indicated
       # by the sensor.
       decimal_digits = recvbuf[5]
       if decimal_digits == 1:
-        Con = Con * 0.1
+        self.gasconcentration = self.gasconcentration * 0.1
       elif decimal_digits == 2:
-        Con = Con * 0.01
+        self.gasconcentration = self.gasconcentration * 0.01
 
     else: # Checksum failed.
       return 0.0

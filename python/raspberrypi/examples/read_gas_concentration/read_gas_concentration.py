@@ -62,7 +62,7 @@ def loop():
   # Gastype is set while reading the gas level. Must first perform a read before
   # attempting to use it.
   con = gas.read_gas_concentration()
-  print ("Ambient "+ gas.gastype +" concentration is:"+str(con)+"%VOL")
+  print ("Ambient "+ gas.gastype + " concentration: %.2f " % con + gas.gasunits + " temp: %.1fC" % gas.temp)
   time.sleep(1)  
 
 if __name__ == "__main__":
