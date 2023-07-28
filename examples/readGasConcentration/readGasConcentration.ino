@@ -36,20 +36,22 @@
 #define I2C_ADDRESS    0x77
   DFRobot_GAS_I2C gas(&Wire ,I2C_ADDRESS);
 #else
-#if (!defined ARDUINO_ESP32_DEV) && (!defined __SAMD21G18A__)
-/**
-  UNO:pin_2-----RX
-      pin_3-----TX
-*/
-  SoftwareSerial mySerial(2,3);
-  DFRobot_GAS_SoftWareUart gas(&mySerial);
-#else
-/**
-  ESP32:IO16-----RX
-        IO17-----TX
-*/
-  DFRobot_GAS_HardWareUart gas(&Serial2); //ESP32HardwareSerial
-#endif
+/* ---------------------------------------------------------------------------------------------------------------------
+ *    board   |             MCU                | Leonardo/Mega2560/M0 |    UNO    | ESP8266 | ESP32 |  microbit  |   m0  |
+ *     VCC    |            3.3V/5V             |        VCC           |    VCC    |   VCC   |  VCC  |     X      |  vcc  |
+ *     GND    |              GND               |        GND           |    GND    |   GND   |  GND  |     X      |  gnd  |
+ *     RX     |              TX                |     Serial1 TX1      |     5     |   5/D6  |  D2   |     X      |  tx1  |
+ *     TX     |              RX                |     Serial1 RX1      |     4     |   4/D7  |  D3   |     X      |  rx1  |
+ * ----------------------------------------------------------------------------------------------------------------------*/
+/* Baud rate cannot be changed  */
+  #if defined(ARDUINO_AVR_UNO) || defined(ESP8266)
+    SoftwareSerial mySerial(4, 5);
+    DFRobot_GAS_SoftWareUart gas(&mySerial ,9600);
+  #elif defined(ESP32)
+    DFRobot_GAS_HardWareUart gas(&Serial1 ,9600 ,/*rx*/D2 ,/*tx*/D3);
+  #else
+    DFRobot_GAS_HardWareUart gas(&Serial1 ,9600);
+  #endif
 #endif
 
 void setup() {
@@ -76,20 +78,16 @@ void setup() {
 }
 
 void loop() {
-  String gastype = gas.queryGasType();
   /**
    *Fill in the parameter readGasConcentration() with the type of gas to be obtained and print
    *The current gas concentration
    *Print with 1s delay each time
    */
   Serial.print("Ambient ");
-  Serial.print(gastype);
+  Serial.print(gas.queryGasType());
   Serial.print(" concentration is: ");
   Serial.print(gas.readGasConcentrationPPM());
-  if (gastype == "O2")
-    Serial.println(" %vol");
-  else
-    Serial.println(" PPM");
+  Serial.println(" %vol");
   Serial.println();
   delay(1000);
 }
