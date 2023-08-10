@@ -57,7 +57,7 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(pin,GPIO.IN)
 
 def setup():
-  while (False==gas.set_threshold_alarm(gas.ON,20,gas.read_gas_type())):
+  while (False==gas.set_threshold_alarm(gas.ON,20,read_gas_type)):
     print ("set alarm ERROR!")
     time.sleep(1)
   

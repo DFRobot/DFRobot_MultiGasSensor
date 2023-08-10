@@ -296,10 +296,6 @@ class DFRobot_GAS_I2C : public DFRobot_GAS
     uint8_t _I2C_addr;
 };
 
-
-
-
-
 #if defined(ARDUINO_AVR_UNO) || defined(ESP8266)
 class DFRobot_GAS_SoftWareUart : public DFRobot_GAS
 {
@@ -314,7 +310,7 @@ class DFRobot_GAS_SoftWareUart : public DFRobot_GAS
   private:
     SoftwareSerial *_psoftUart;
     uint32_t _baud;
-}; 
+};
 #else
 class DFRobot_GAS_HardWareUart : public DFRobot_GAS
 {

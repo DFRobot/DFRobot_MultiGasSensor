@@ -205,7 +205,7 @@ bool DFRobot_GAS::changeAcquireMode(eMethod_t mode)
   buf[1] = mode;
   sProtocol_t _protocol = pack(buf, sizeof(buf));
   writeData(0, (uint8_t *)&_protocol, sizeof(_protocol));
-  delay(100);
+  delay(10);
   readData(0,recvbuf,9);
   if(recvbuf[2]==1){
     return true;
@@ -223,7 +223,7 @@ float DFRobot_GAS::readGasConcentrationPPM(void)
   buf[0] = CMD_GET_GAS_CONCENTRATION;
   sProtocol_t _protocol = pack(buf, sizeof(buf));
   writeData(0, (uint8_t *)&_protocol, sizeof(_protocol));
-  delay(100);
+  delay(10);
   readData(0, recvbuf, 9);
   float Con=0.0;
   if(FucCheckSum(recvbuf,8) == recvbuf[8])
@@ -349,7 +349,7 @@ String DFRobot_GAS::queryGasType(void)
   buf[0] = CMD_GET_GAS_CONCENTRATION;
   sProtocol_t _protocol = pack(buf, sizeof(buf));
   writeData(0, (uint8_t *)&_protocol, sizeof(_protocol));
-  delay(100);
+  delay(10);
   readData(0, recvbuf, 9);
 
 
@@ -392,6 +392,11 @@ String DFRobot_GAS::queryGasType(void)
         return "PH3";
         break;
       default:
+        Serial.println("none");
+        for(uint8_t i = 0; i < 9; i++){
+          Serial.print(recvbuf[i] ,HEX);
+          Serial.print(" ");
+        }
         return "";
         break;
     }
@@ -428,7 +433,7 @@ bool DFRobot_GAS::setThresholdAlarm(eSwitch_t switchof, uint16_t threshold, eALA
   buf[4] = alamethod;
   sProtocol_t _protocol = pack(buf, sizeof(buf));
   writeData(0, (uint8_t *)&_protocol, sizeof(_protocol));
-  delay(100);
+  delay(10);
   readData(0, recvbuf, 9);
   if (recvbuf[8]!=FucCheckSum(recvbuf,8))
     return false;
@@ -445,7 +450,7 @@ float DFRobot_GAS::readTempC(void)
   buf[0] = CMD_GET_TEMP;
   sProtocol_t _protocol = pack(buf, sizeof(buf));
   writeData(0, (uint8_t *)&_protocol, sizeof(_protocol));
-  delay(100);
+  delay(10);
   readData(0, recvbuf, 9);
   if (recvbuf[8] != FucCheckSum(recvbuf, 8))
     return 0.0;
@@ -469,7 +474,7 @@ float DFRobot_GAS::getSensorVoltage(void)
   buf[0] = CMD_SENSOR_VOLTAGE;
   sProtocol_t _protocol = pack(buf, sizeof(buf));
   writeData(0, (uint8_t *)&_protocol, sizeof(_protocol));
-  delay(100);
+  delay(10);
   readData(0, recvbuf, 9);
   if (recvbuf[8] != FucCheckSum(recvbuf, 8))
     return 0.0;
@@ -485,7 +490,7 @@ bool DFRobot_GAS::changeI2cAddrGroup(uint8_t group)
   buf[1] = group;
   sProtocol_t _protocol = pack(buf, sizeof(buf));
   writeData(0, (uint8_t *)&_protocol, sizeof(_protocol));
-  delay(100);
+  delay(10);
   readData(0, recvbuf, 9);
   if (recvbuf[8] != FucCheckSum(recvbuf, 8))
     return 0;
@@ -591,6 +596,7 @@ bool DFRobot_GAS_SoftWareUart::dataIsAvailable(void)
 
 void DFRobot_GAS_SoftWareUart::writeData(uint8_t Reg, void *pData, uint8_t len)
 {
+  Reg++;
   uint8_t* Data = (uint8_t* )pData;
   _psoftUart->write(Data,len);
 }
@@ -598,15 +604,15 @@ void DFRobot_GAS_SoftWareUart::writeData(uint8_t Reg, void *pData, uint8_t len)
 int16_t DFRobot_GAS_SoftWareUart::readData(uint8_t Reg, uint8_t *Data, uint8_t len)
 {
   uint32_t time = millis();
-  uint8_t length;
+  uint8_t length = 0;
+  uint8_t i = 0;
   while((millis()-time)<3000)
   {
     length = _psoftUart->available();
     if (length == len)
       break;
   }
-  int i=0;
-  for (int i = Reg; i < length; i++)
+  for (i = Reg; i < length; i++)
   {
     Data[i] = _psoftUart->read();
     if (i>=8)
@@ -656,6 +662,7 @@ bool DFRobot_GAS_HardWareUart::dataIsAvailable(void)
 
 void DFRobot_GAS_HardWareUart::writeData(uint8_t Reg, void *pData, uint8_t len)
 {
+  Reg++;
   uint8_t *Data = (uint8_t *)pData;
   this->_pharduart->write(Data, len);
 }
@@ -663,7 +670,8 @@ void DFRobot_GAS_HardWareUart::writeData(uint8_t Reg, void *pData, uint8_t len)
 int16_t DFRobot_GAS_HardWareUart::readData(uint8_t Reg, uint8_t *Data, uint8_t len)
 {
   uint32_t time = millis();
-  uint8_t length;
+  uint8_t length = 0;
+  int i = 0;
   while ((millis() - time) < 3000)
   {
     length = _pharduart->available();
@@ -671,8 +679,7 @@ int16_t DFRobot_GAS_HardWareUart::readData(uint8_t Reg, uint8_t *Data, uint8_t l
       break;
   }
 
-  int i = 0;
-  for (int i = Reg; i < length; i++)
+  for (i = Reg; i < length; i++)
   {
     Data[i] = _pharduart->read();
     if (i >= 8)
