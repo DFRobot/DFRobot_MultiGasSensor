@@ -43,7 +43,8 @@ ctype=0
 
 if ctype==0:
   I2C_1       = 0x01               # I2C_1 Use i2c1 interface (or i2c0 with configuring Raspberry Pi) to drive sensor
-  I2C_ADDRESS = 0x77               # I2C Device address, which can be changed by changing A1 and A0, the default address is 0x77
+  I2C_ADDRESS = 0x74               # I2C Device address, which can be changed by changing A1 and A0,
+                                   # the default address on the terminal board as shipped is 0x74
   gas = DFRobot_MultiGasSensor_I2C(I2C_1 ,I2C_ADDRESS)
 else:
   gas = DFRobot_MultiGasSensor_UART(9600)
@@ -58,7 +59,10 @@ def setup():
   time.sleep(1)
   
 def loop():
-  print ("Ambient "+ gas.gastype +" concentration is:"+str(gas.read_gas_concentration())+"%VOL")
+  # Gastype is set while reading the gas level. Must first perform a read before
+  # attempting to use it.
+  con = gas.read_gas_concentration()
+  print ("Ambient "+ gas.gastype + " concentration: %.2f " % con + gas.gasunits + " temp: %.1fC" % gas.temp)
   time.sleep(1)  
 
 if __name__ == "__main__":

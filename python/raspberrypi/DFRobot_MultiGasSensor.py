@@ -30,8 +30,6 @@ UART_MODE = 0x02
 
 sendbuf = [0]*9  
 recvbuf = [0]*9
-tempSwitch = 0
-temp = 0.0
 def fuc_check_sum(i,ln):
   '''!
     @brief CRC check function
@@ -53,6 +51,27 @@ def clear_buffer(buf,length):
   '''
   for i in range(0,length):
     buf[i]=0
+
+
+class DFRobot_GasType:
+  '''!
+    @brief Enumerates all known sensor types. DFRobot_MultiGasSensor.gastype
+    @n     will be set to one of these.
+  '''
+  O2  = "O2"
+  CO  = "CO"
+  H2S = "H2S"
+  NO2 = "NO2"
+  O3  = "O3"
+  CL2 = "CL2"
+  NH3 = "NH3"
+  H2  = "H2"
+  HCL = "HCL"
+  SO2 = "SO2"
+  HF  = "HF"
+  PH3 = "PH3"
+  UNKNOWN = ""
+
 
 class DFRobot_MultiGasSensor(object):
   '''!
@@ -80,9 +99,11 @@ class DFRobot_MultiGasSensor(object):
   GASKIND    =  0x01
   ON         =  0x01
   OFF        =  0x00
-  gasconcentration = 0.0
-  gastype       =    ""  
+  gasconcentration = 0.0 # Raw, uncorrected sensor measurement.
+  gastype       =    ""
+  gasunits      =    ""
   temp          =    0.0
+  tempSwitch = OFF
   
   def __init__(self ,bus ,Baud):
     if bus != 0:
@@ -98,6 +119,203 @@ class DFRobot_MultiGasSensor(object):
     if k == recvbuf:
       return recvbuf
 
+
+  def __set_gastype(self, probe_type):
+    '''!
+      @brief   Sets instance gas type and units based on type read from sensor.
+      @param probe_type Byte received from sensor indicating sensor type.
+    '''
+    if probe_type == self.O2:
+      self.gastype = DFRobot_GasType.O2
+      self.gasunits = "%%"
+    elif probe_type == self.CO:
+      self.gastype = DFRobot_GasType.CO
+      self.gasunits = "ppm"
+    elif probe_type == self.H2S:
+      self.gastype = DFRobot_GasType.H2S
+    elif probe_type == self.NO2:
+      self.gasunits = "ppm"
+      self.gastype = DFRobot_GasType.NO2
+    elif probe_type == self.O3:
+      self.gasunits = "ppm"
+      self.gastype = DFRobot_GasType.O3
+    elif probe_type == self.CL2:
+      self.gasunits = "ppm"
+      self.gastype = DFRobot_GasType.CL2
+    elif probe_type == self.NH3:
+      self.gasunits = "ppm"
+      self.gastype = DFRobot_GasType.NH3
+    elif probe_type == self.H2:
+      self.gastype = DFRobot_GasType.H2
+      self.gasunits = "ppm"
+    elif probe_type == self.HCL:
+      self.gastype = DFRobot_GasType.HCL
+      self.gasunits = "ppm"
+    elif probe_type == self.SO2:
+      self.gastype = DFRobot_GasType.SO2
+      self.gasunits = "ppm"
+    elif probe_type == self.HF:
+      self.gastype = DFRobot_GasType.HF
+      self.gasunits = "ppm"
+    elif probe_type == self.PH3:
+      self.gastype = DFRobot_GasType.PH3
+      self.gasunits = "ppm"
+    else:
+      self.gastype =DFRobot_GasType.UNKNOWN
+      self.gasunits = ""
+
+
+  def __adc_to_temp(self, temp_ADC):
+    '''!
+      @brief Converts temperature ADC measurement to temperature.
+      @param temp_ADC 10-bit A/D measurement from onboard temperature sensor.
+    '''
+    Vpd3=float(temp_ADC/1024.0)*3
+    Rth = Vpd3*10000/(3-Vpd3)
+    return 1/(1/(273.15+25)+1/3380.13*(math.log(Rth/10000)))-273.15
+
+
+  def __temp_correction(self, Con):
+    '''!
+      @brief Performs temperature correction of sensor value.
+      @param Con Measured value from sensor.
+    '''
+
+    # NOTE: this implementation replicates the thresholds and corrections
+    # from the C++ version of the library as of commit 54e465b. The python
+    # version was significantly different in many ways, resulting in different
+    # results based on which library is used.
+
+    # TODO: restructure all of the checks below to stop repeatedly checking
+    # against the same tresholds over and over. This would be more efficient
+    # and way more readable if all of the checks followed the pattern:
+    #
+    # if self.temp < threshold_1:
+    #   Con = 0.0
+    # elif self.temp < threshold_2:
+    #   Con = some sort of correction
+    # elif self.temp < theshold_3:
+    #   Con = another correction
+    # else:
+    #   Con = 0.0
+    
+    # If temperature corrections not enabled, don't alter the sensor value.
+    if self.tempSwitch != self.ON:
+      return Con
+
+    if self.gastype == DFRobot_GasType.O2:
+      # No temperature dependency.
+      pass
+
+    elif self.gastype == DFRobot_GasType.CO:
+      if (self.temp > -40) and (self.temp <= 20):
+        Con = Con / (0.005 * self.temp + 0.9)
+      elif (self.temp > 20) and (self.temp <= 40):
+        Con = Con / (0.005 * self.temp + 0.9) - (0.3 *self.temp - 6)
+      else:
+        Con = 0.0
+
+    elif self.gastype == DFRobot_GasType.H2S:
+      if (self.temp > -20) and (self.temp <= 20):
+        Con = Con / (0.005 * self.temp + 0.92)
+      elif (self.temp > 20) and (self.temp <= 60):
+        Con = Con - (0.015 * self.temp - 0.3);
+      else:
+        Con = 0.0
+
+    elif self.gastype == DFRobot_GasType.NO2:
+      if (self.temp > -20) and (self.temp <= 0):
+        Con = Con / (0.005 * self.temp + 0.9) - (-0.0025 * self.temp + 0.005)
+      elif (self.temp > 0) and (self.temp <= 20):
+        Con = Con / (0.005 * self.temp + 0.9) - (0.005 * self.temp + 0.005)
+      elif (self.temp > 20) and (self.temp <= 40):
+        Con = Con / (0.005 * self.temp + 0.9) - (0.0025 * self.temp + 0.3)
+      elif (self.temp > 40) and (self.temp < 50):
+        Con = Con / (0.005 * self.temp + 0.9) - (-0.048 * self.temp -0.92)
+      else :
+        Con =   0.0
+
+    elif self.gastype == DFRobot_GasType.O3:
+      if (self.temp > -20) and (self.temp <= 0):
+        Con = Con / (0.015 * self.temp + 1.1) - 0.05
+      elif (self.temp > 0) and (self.temp <= 20):
+        Con = Con - (0.01 * self.temp)
+      elif (self.temp > 20) and (self.temp <= 40):
+        Con = Con - (0.005 * self.temp + 0.4)
+      elif (self.temp > 40) and (self.temp < 50):
+        Con = Con - (0.007 * self.temp - 1.68)
+      else:
+         Con = 0.0
+
+    elif self.gastype == DFRobot_GasType.CL2:
+      if (self.temp > -20) and (self.temp <= 0):
+        Con = Con / (0.015 * self.temp + 1.1) -0.0025
+      elif (self.temp > 0) and (self.temp <= 20):
+        Con = Con / 1.1 - 0.005 * self.temp
+      elif (self.temp > 20) and (self.temp < 40):
+        Con = Con - (-0.005 * self.temp + 0.3)
+      else:
+        Con = 0.0
+
+    elif self.gastype == DFRobot_GasType.NH3:
+      if (self.temp > -20) and (self.temp <= 0):
+        Con = Con / (0.006 * self.temp + 0.95) - (-0.006 * self.temp + 0.25)
+      elif (self.temp > 0) and (self.temp <= 20):
+        Con = Con / (0.006 * self.temp + 0.95) - (-0.012 * self.temp + 0.25)
+      elif (self.temp > 20) and (self.temp < 40):
+        Con = Con / (0.005 * self.temp + 1.08) - (-0.1 * self.temp + 2)
+      else:
+        Con = 0.0
+
+    elif self.gastype == DFRobot_GasType.H2:
+      if (self.temp > -20) and (self.temp <= 20):
+        Con = Con / (0.0074 * self.temp + 0.7) - 5
+      if (self.temp > 20) and (self.temp <= 40):
+        Con = Con / (0.025 * self.temp + 0.3) - 5
+      if (self.temp > 40) and (self.temp <= 60):
+        Con = Con / (0.001 * self.temp + 0.9) - (0.75 * self.temp-25)
+      else:
+        Con = 0.0
+
+    elif self.gastype == DFRobot_GasType.HCL:
+      if (self.temp > -20) and (self.temp <= 0):
+        Con = Con - (-0.0075 * self.temp - 0.1)
+      elif (self.temp > 0) and (self.temp <= 20):
+        Con = Con - (-0.1)
+      elif (self.temp > 20) and (self.temp < 50):
+        Con = Con - (-0.01 * self.temp + 0.1)
+
+    elif self.gastype == DFRobot_GasType.SO2:
+      if (self.temp >- 40) and (self.temp <= 40):
+        Con = Con / (0.006 * self.temp + 0.95)
+      elif (self.temp > 40) and (self.temp <= 60):
+        Con = Con / (0.006 * self.temp + 0.95) - (0.05 * self.temp - 2)
+
+    elif self.gastype == DFRobot_GasType.HF:
+      if (self.temp > -20) and (self.temp <= 0):
+        Con = Con/1 - (-0.0025 * self.temp)
+      elif (self.temp > 0) and (self.temp <= 20):
+        Con = Con/1 + 0.1
+      elif (self.temp>20) and (self.temp < 40):
+        Con = Con / 1 - (0.01 * self.temp - 0.85)
+      else:
+        Con = 0.0
+
+    elif self.gastype == DFRobot_GasType.PH3:
+      if (self.temp > -20) and (self.temp < 40):
+        Con = Con / (0.005 * self.temp + 0.9)
+
+    else: # Do not modify values for unknown sensors.
+      pass
+
+    # No sensor measurements are ever below zero, so it makes little sense
+    # for the corrected version to be so.
+    if Con < 0:
+      return 0.0
+
+    return Con
+
+
   def analysis_all_data(self,recv):
     '''!
       @brief   The obtained data list by parsing.
@@ -109,110 +327,18 @@ class DFRobot_MultiGasSensor(object):
     elif(recv[5]==1):
       self.gasconcentration = 0.1*((recv[2] << 8) + recv[3])
     elif(recv[5]==2):
-      self.gasconcentration = 0.01*((recv[2] << 8) + recv[3]) 
-    #recv[4]Indicate probe type
-    if recv[4]==0x05:
-      self.gastype = "O2"
-    elif recv[4]==0x04:
-      self.gastype = "CO"
-    elif recv[4]==0x03:
-      self.gastype = "H2S"
-    elif recv[4]==0x2C:
-      self.gastype = "NO2"
-    elif recv[4]==0x2A:
-      self.gastype = "O3"
-    elif recv[4]==0x31:
-      self.gastype = "CL2"
-    elif recv[4]==0x02:
-      self.gastype = "NH3"
-    elif recv[4]==0x06:
-      self.gastype = "H2"
-    elif recv[4]==0x33:
-      self.gastype = "HF"
-    elif recv[4]==0x45:
-      self.gastype = "PH3"
-    else:
-      self.gastype =""
-    Con = self.gasconcentration  
-    if (self.gastype == self.O2):
-      pass
-    elif (self.gastype == self.CO) :
-      if(((temp)>-20) and ((temp)<20)):
-        Con = (Con/(0.005*(temp)+0.9))
-      elif (((temp)>20) and ((temp)<40)):
-        Con = (Con/(0.005*(temp)+0.9)-(0.3*(temp)-6))
-      else:
-        Con = 0.0
-    elif (self.gastype == self.H2S):
-      if(((temp)>-20) and ((temp)<20)):
-        Con = (Con/(0.006*(temp)+0.92))
-      elif (((temp)>20) and ((temp)<40)):
-        Con = (Con/(0.006*(temp)+0.92)-(0.015*(temp)+2.4))
-      else :
-        Con = 0.0
-    elif (self.gastype == self.NO2):
-      if(((temp)>-20) and ((temp)<0)):
-        Con = ((Con/(0.005*(temp)+0.9)-(-0.0025*(temp))))
-      elif (((temp)>0) and ((temp)<20)):
-        Con = ((Con/(0.005*(temp)+0.9)-(0.005*(temp)+0.005)))
-      elif (((temp)>20) and ((temp)<40)):
-        Con = ((Con/(0.005*(temp)+0.9)-(0.0025*(temp)+0.1)))
-      else :
-        Con =   0.0
-    elif (self.gastype == self.O3):
-      if(((temp)>-20) and ((temp)<0)):
-        Con = ((Con/(0.015*(temp)+1.1)-0.05))
-      elif (((temp)>0) and ((temp)<20)):
-        Con = ((Con/1.1-(0.01*(temp))))
-      elif (((temp)>20) and ((temp)<40)):
-        Con = ((Con/1.1-(-0.05*(temp)+0.3)))
-      else :
-         Con = 0.0
-    elif (self.gastype == self.CL2):
-      if(((temp)>-20) and ((temp)<0)):
-        Con = ((Con/(0.015*(temp)+1.1)-(-0.0025*(temp))))
-      elif (((temp)>0) and ((temp)<20)):
-        Con = ((Con/1.1-0.005*(temp)))
-      elif (((temp)>20) and ((temp)<40)):
-        Con = ((Con/1.1-(0.06*(temp)-0.12)))
-      else:
-        Con = 0.0
-    elif (self.gastype ==self.NH3):
-      if(((temp)>-20) and ((temp)<0)):
-        Con = (Con/(0.08*(temp)+3.98)-(-0.005*(temp)+0.3))
-      elif (((temp)>0) and ((temp)<20)):
-        Con = (Con/(0.08*(temp)+3.98)-(-0.005*(temp)+0.3))
-      elif (((temp)>20) and ((temp)<40)):
-        Con = (Con/(0.004*(temp)+1.08)-(-0.1*(temp)+2))
-      else:
-        Con = 0.0
-    elif (self.gastype == self.H2):
-      if(((temp)>-20) and ((temp)<40)):
-        Con = (Con/(0.74*(temp)+0.007)-5)
-      else:
-        Con =   0.0
-    elif (self.gastype == self.HF):
-      if(((temp)>-20) and ((temp)<0)):
-        Con = (((Con/1)-(-0.0025*(temp))))
-      elif (((temp)>0) and ((temp)<20)):
-        Con = ((Con/1+0.1))
-      elif (((temp)>20) and ((temp)<40)):
-        Con = ((Con/1-(0.0375*(temp)-0.85)))
-      else :
-        Con = 0.0
-    elif (self.gastype == self.PH3):
-      if(((temp)>-20) and ((temp)<40)):
-        Con = ((Con/(0.005*(temp)+0.9)))
-    else:
-      Con = 0.0             
-    if(Con>0):
-      self.gasconcentration = Con
-    else:
-      self.gasconcentration = 0
-    temp_ADC=(recv[6]<<8)+recv[7] 
-    Vpd3=float(temp_ADC/1024.0)*3
-    Rth = Vpd3*10000/(3-Vpd3)
-    self.temp = 1/(1/(273.15+25)+1/3380.13*(math.log(Rth/10000)))-273.15     
+      self.gasconcentration = 0.01*((recv[2] << 8) + recv[3])
+
+    # Update sensor type from info in response (byte 4).
+    self.__set_gastype(recv[4])
+
+    # Update current temperature.
+    temp_ADC=(recv[6]<<8)+recv[7]
+    self.temp = self.__adc_to_temp(temp_ADC)
+
+    # Perform temperature correction of the value if enabled.
+    Con = self.__temp_correction(self.gasconcentration)
+
     
   def change_acquire_mode(self,mode):
     '''!
@@ -262,115 +388,31 @@ class DFRobot_MultiGasSensor(object):
     time.sleep(0.1)
     self.read_data(0,recvbuf,9)
     if(fuc_check_sum(recvbuf,8) == recvbuf[8]):
-      Con=((recvbuf[2]<<8)+recvbuf[3])*1.0
-    else:
-      return 0.0 
-    #recv[4] Indicate probe type
-    if recvbuf[4]==0x05:
-      self.gastype = "O2"
-    elif recvbuf[4]==0x04:
-      self.gastype = "CO"
-    elif recvbuf[4]==0x03:
-      self.gastype = "H2S"
-    elif recvbuf[4]==0x2C:
-      self.gastype = "NO2"
-    elif recvbuf[4]==0x2A:
-      self.gastype = "O3"
-    elif recvbuf[4]==0x31:
-      self.gastype = "CL2"
-    elif recvbuf[4]==0x02:
-      self.gastype = "NH3"
-    elif recvbuf[4]==0x06:
-      self.gastype = "H2"
-    elif recvbuf[4]==0x33:
-      self.gastype = "HF"
-    elif recvbuf[4]==0x45:
-      self.gastype = "PH3"
-    else:
-      self.gastype = ""
-    gastype = recvbuf[4]
-    decimal_digits = recvbuf[5]
-    if(tempSwitch == self.OFF):
-      if(decimal_digits==1):
-        Con =  (Con*0.1)
-      elif(decimal_digits==2):
-        Con =  (Con*0.01)
-      return Con      
-    if (gastype == self.O2):
-      pass
-    elif (gastype == self.CO) :
-      if(((temp)>-20) and ((temp)<20)):
-        Con = (Con/(0.005*(temp)+0.9))
-      elif (((temp)>20) and ((temp)<40)):
-        Con = (Con/(0.005*(temp)+0.9)-(0.3*(temp)-6))
-      else:
-        Con = 0.0
-    elif (gastype == self.H2S):
-      if(((temp)>-20) and ((temp)<20)):
-        Con = (Con/(0.006*(temp)+0.92))
-      elif (((temp)>20) and ((temp)<40)):
-        Con = (Con/(0.006*(temp)+0.92)-(0.015*(temp)+2.4))
-      else :
-        Con = 0.0
-    elif (gastype == self.NO2):
-      if(((temp)>-20) and ((temp)<0)):
-        Con = ((Con/(0.005*(temp)+0.9)-(-0.0025*(temp))))
-      elif (((temp)>0) and ((temp)<20)):
-        Con = ((Con/(0.005*(temp)+0.9)-(0.005*(temp)+0.005)))
-      elif (((temp)>20) and ((temp)<40)):
-        Con = ((Con/(0.005*(temp)+0.9)-(0.0025*(temp)+0.1)))
-      else :
-        Con =   0.0
-    elif (gastype == self.O3):
-      if(((temp)>-20) and ((temp)<0)):
-        Con = ((Con/(0.015*(temp)+1.1)-0.05))
-      elif (((temp)>0) and ((temp)<20)):
-        Con = ((Con/1.1-(0.01*(temp))))
-      elif (((temp)>20) and ((temp)<40)):
-        Con = ((Con/1.1-(-0.05*(temp)+0.3)))
-      else :
-         Con = 0.0
-    elif (gastype == self.CL2):
-      if(((temp)>-20) and ((temp)<0)):
-        Con = ((Con/(0.015*(temp)+1.1)-(-0.0025*(temp))))
-      elif (((temp)>0) and ((temp)<20)):
-        Con = ((Con/1.1-0.005*(temp)))
-      elif (((temp)>20) and ((temp)<40)):
-        Con = ((Con/1.1-(0.06*(temp)-0.12)))
-      else:
-        Con = 0.0
-    elif (gastype ==self.NH3):
-      if(((temp)>-20) and ((temp)<0)):
-        Con = (Con/(0.08*(temp)+3.98)-(-0.005*(temp)+0.3))
-      elif (((temp)>0) and ((temp)<20)):
-        Con = (Con/(0.08*(temp)+3.98)-(-0.005*(temp)+0.3))
-      elif (((temp)>20) and ((temp)<40)):
-        Con = (Con/(0.004*(temp)+1.08)-(-0.1*(temp)+2))
-      else:
-        Con = 0.0
-    elif (gastype == self.H2):
-      if(((temp)>-20) and ((temp)<40)):
-        Con = (Con/(0.74*(temp)+0.007)-5)
-      else:
-        Con =   0.0
-    elif (gastype == self.HF):
-      if(((temp)>-20) and ((temp)<0)):
-        Con = (((Con/1)-(-0.0025*(temp))))
-      elif (((temp)>0) and ((temp)<20)):
-        Con = ((Con/1+0.1))
-      elif (((temp)>20) and ((temp)<40)):
-        Con = ((Con/1-(0.0375*(temp)-0.85)))
-      else :
-        Con = 0.0
-    elif (gastype == self.PH3):
-      if(((temp)>-20) and ((temp)<40)):
-        Con = ((Con/(0.005*(temp)+0.9)))
-    else:
-      Con = 0.0 
-    if(Con<0):
-      return 0
-    else:
-      return Con     
+      self.gasconcentration = ((recvbuf[2]<<8)+recvbuf[3])*1.0
+
+      # Scale measurement based on the number of decimal places indicated
+      # by the sensor.
+      decimal_digits = recvbuf[5]
+      if decimal_digits == 1:
+        self.gasconcentration = self.gasconcentration * 0.1
+      elif decimal_digits == 2:
+        self.gasconcentration = self.gasconcentration * 0.01
+
+    else: # Checksum failed.
+      return 0.0
+
+    # Update sensor type from info in response (byte 4).
+    self.__set_gastype(recvbuf[4])
+
+    # Update temperature measurement if temperature correction is enabled.
+    if(self.tempSwitch == self.ON):
+      self.temp = self.read_temp()
+
+    # Perform temperature correction of the value if enabled.
+    Con = self.__temp_correction(self.gasconcentration)
+
+    return Con
+
 
   def read_gas_type(self):
     '''!
@@ -419,21 +461,23 @@ class DFRobot_MultiGasSensor(object):
       @retval True   change success
       @retval False  change fail
     '''  
-    if (gasType == self.O2):
+    global sendbuf
+    global recvbuf
+    if self.gastype == DFRobot_GasType.O2:
       threshold *= 10
-    elif (gasType == self.NO2):
+    elif self.gastype == DFRobot_GasType.NO2:
       threshold *= 10
-    elif (gasType == self.O3):
+    elif self.gastype == DFRobot_GasType.O3:
       threshold *= 10
-    elif (gasType == self.CL2):
+    elif self.gastype == DFRobot_GasType.CL2:
       threshold *= 10
-    elif (gasType == self.HCL):
+    elif self.gastype == DFRobot_GasType.HCL:
       threshold *= 10
-    elif (gasType == self.SO2):
+    elif self.gastype == DFRobot_GasType.SO2:
       threshold *= 10
-    elif (gasType == self.HF):
+    elif self.gastype == DFRobot_GasType.HF:
       threshold *= 10
-    elif (gasType == self.PH3):
+    elif self.gastype == DFRobot_GasType.PH3:
       threshold *= 10
     global sendbuf
     global recvbuf  
@@ -476,10 +520,7 @@ class DFRobot_MultiGasSensor(object):
     time.sleep(0.1)
     self.read_data(0,recvbuf,9)
     temp_ADC=(recvbuf[2]<<8)+recvbuf[3]
-    Vpd3=float(temp_ADC/1024.0)*3
-    Rth = Vpd3*10000/(3-Vpd3)
-    Tbeta = 1/(1/(273.15+25)+1/3380.13*(math.log(Rth/10000)))-273.15
-    return Tbeta
+    return self.__adc_to_temp(temp_ADC)
     
   def set_temp_compensation(self,tempswitch):
     '''!
@@ -489,7 +530,7 @@ class DFRobot_MultiGasSensor(object):
                    ON  Turn on temperature compensation
                    OFF Turn off temperature compensation
     '''  
-    tempSwitch = tempswitch
+    self.tempSwitch = tempswitch
     temp = self.read_temp()
     
   def read_volatage_data(self):
