@@ -52,7 +52,7 @@ static void analysisAllData(void)
         case DFRobot_GAS::O2:
           break;
         case DFRobot_GAS::CO:
-          if (((_temp) > -40) && ((_temp) <= 20))
+          if (((_temp) > -20) && ((_temp) < 20))
             Con = (Con / (0.005 * (_temp) + 0.9));
           else if (((_temp) > 20) && ((_temp) < 40))
             Con = (Con / (0.005 * (_temp) + 0.9) - (0.3 * (_temp)-6));
@@ -60,74 +60,66 @@ static void analysisAllData(void)
             Con = 0.0;
           break;
         case DFRobot_GAS::H2S:
-          if (((_temp) > -40) && ((_temp) <= 20))
-            Con = (Con / (0.005 * (_temp) + 0.92));
-          else if (((_temp) > 20) && ((_temp) <= 60))
-            Con = (Con  - (0.015 * (_temp) - 0.3));
+          if (((_temp) > -20) && ((_temp) < 20))
+            Con = (Con / (0.006 * (_temp) + 0.92));
+          else if (((_temp) > 20) && ((_temp) < 40))
+            Con = (Con / (0.006 * (_temp) + 0.92) - (0.015 * (_temp) + 2.4));
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::NO2:
-          if (((_temp) > -20) && ((_temp) <= 0))
-            Con = ((Con / (0.005 * (_temp) + 0.9) - (-0.0025 * (_temp) + 0.005)));
-          else if (((_temp) > 0) && ((_temp) <= 20))
+          if (((_temp) > -20) && ((_temp) < 0))
+            Con = ((Con / (0.005 * (_temp) + 0.9) - (-0.0025 * (_temp))));
+          else if (((_temp) > 0) && ((_temp) < 20))
             Con = ((Con / (0.005 * (_temp) + 0.9) - (0.005 * (_temp) + 0.005)));
-          else if (((_temp) > 20) && ((_temp) <= 40))
-            Con = ((Con / (0.005 * (_temp) + 0.9) - (-0.0025 * (_temp) + 0.3)));
-          else if (((_temp) > 40) && ((_temp) < 50))
-            Con = ((Con / (0.005 * (_temp) + 0.9) - (-0.048 * (_temp) - 0.92)));
+          else if (((_temp) > 20) && ((_temp) < 40))
+            Con = ((Con / (0.005 * (_temp) + 0.9) - (0.0025 * (_temp) + 0.1)));
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::O3:
-          if (((_temp) > -20) && ((_temp) <= 0))
+          if (((_temp) > -20) && ((_temp) < 0))
             Con = ((Con / (0.015 * (_temp) + 1.1) - 0.05));
-          else if (((_temp) > 0) && ((_temp) <= 20))
-            Con = ((Con  - (0.01 * (_temp))));
-          else if (((_temp) > 20) && ((_temp) <= 40))
-            Con = ((Con  - (-0.005 * (_temp) + 0.4)));
-          else if (((_temp) > 40) && ((_temp) < 50))
-            Con = Con - (0.067 * (_temp)-1.68);
+          else if (((_temp) > 0) && ((_temp) < 20))
+            Con = ((Con / 1.1 - (0.01 * (_temp))));
+          else if (((_temp) > 20) && ((_temp) < 40))
+            Con = ((Con / 1.1 - (-0.05 * (_temp) + 0.3)));
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::CL2:
-          if (((_temp) > -20) && ((_temp) <= 0))
-            Con = ((Con / (0.015 * (_temp) + 1.1) - 0.0025 ));
-          else if (((_temp) > 0) && ((_temp) <= 20))
+          if (((_temp) > -20) && ((_temp) < 0))
+            Con = ((Con / (0.015 * (_temp) + 1.1) - (-0.0025 * (_temp))));
+          else if (((_temp) > 0) && ((_temp) < 20))
             Con = ((Con / 1.1 - 0.005 * (_temp)));
           else if (((_temp) > 20) && ((_temp) < 40))
-            Con = ((Con  - (-0.005 * (_temp)+0.3)));
+            Con = ((Con / 1.1 - (0.06 * (_temp)-0.12)));
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::NH3:
-          if (((_temp) > -40) && ((_temp) <= 0))
-            Con = (Con / (0.006 * (_temp) + 0.95) - (-0.006 * (_temp) + 0.25));
-          else if (((_temp) > 0) && ((_temp) <= 20))
-            Con = (Con / (0.006 * (_temp) + 0.95) - (-0.012 * (_temp) + 0.25));
+          if (((_temp) > -20) && ((_temp) < 0))
+            Con = (Con / (0.08 * (_temp) + 3.98) - (-0.005 * (_temp) + 0.3));
+          else if (((_temp) > 0) && ((_temp) < 20))
+            Con = (Con / (0.08 * (_temp) + 3.98) - (-0.005 * (_temp) + 0.3));
           else if (((_temp) > 20) && ((_temp) < 40))
-            Con = (Con / (0.005 * (_temp) + 1.08) - (-0.1 * (_temp) + 2));
+            Con = (Con / (0.004 * (_temp) + 1.08) - (-0.1 * (_temp) + 2));
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::H2:
-          if (((_temp) > -20) && ((_temp) <= 20))
-            Con = (Con / (0.0074 * (_temp) + 0.7) - 5);
-          if (((_temp) > 20) && ((_temp) <= 40))
-            Con = (Con / (0.025 * (_temp)+0.3)) - 5;
-          if (((_temp) > 40) && ((_temp) <= 60))
-            Con = (Con / (0.001 * (_temp) + 0.9)) - (0.75 * (_temp) - 25);
+          if (((_temp) > -20) && ((_temp) < 40))
+            Con = (Con / (0.74 * (_temp) + 0.007) - 5);
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::HF:
-          if (((_temp) > -20) && ((_temp) <= 0))
-            Con = (((Con / 1) - (-0.0075 * (_temp)-0.1)));
-          else if (((_temp) > 0) && ((_temp) <= 20))
+          if (((_temp) > -20) && ((_temp) < 0))
+            Con = (((Con / 1) - (-0.0025 * (_temp))));
+          else if (((_temp) > 0) && ((_temp) < 20))
             Con = ((Con / 1 + 0.1));
-          else if (((_temp) > 20) && ((_temp) < 50))
-            Con = ((Con / 1 - (0.01 * (_temp)-0.85)));
+          else if (((_temp) > 20) && ((_temp) < 40))
+            Con = ((Con / 1 - (0.0375 * (_temp)-0.85)));
           else
             Con = 0.0;
           break;
@@ -136,18 +128,8 @@ static void analysisAllData(void)
             Con = ((Con / (0.005 * (_temp) + 0.9)));
           break;
         case DFRobot_GAS::HCL:
-          if ((_temp > -20) && (_temp >= 0))
-            Con = Con - (-0.0075 * _temp-0.1);
-          else if ((_temp > 0) && (_temp >= 20))
-            Con = Con-(-0.1);
-          else if ((_temp > 20) && (_temp >= 50))
-            Con = Con - (-0.01 * _temp + 0.1);
-            break;
+          break;
         case DFRobot_GAS::SO2:
-          if ((_temp > -40) && (_temp >= 40))
-            Con = Con / (0.006 * _temp+0.95);
-          else if((_temp > 40) && (_temp >= 60))
-            Con = Con / (0.006 * _temp + 0.95) - (0.05 * _temp-2);
           break;
         default:
           break;
@@ -223,7 +205,7 @@ bool DFRobot_GAS::changeAcquireMode(eMethod_t mode)
   buf[1] = mode;
   sProtocol_t _protocol = pack(buf, sizeof(buf));
   writeData(0, (uint8_t *)&_protocol, sizeof(_protocol));
-  delay(100);
+  delay(10);
   readData(0,recvbuf,9);
   if(recvbuf[2]==1){
     return true;
@@ -241,7 +223,7 @@ float DFRobot_GAS::readGasConcentrationPPM(void)
   buf[0] = CMD_GET_GAS_CONCENTRATION;
   sProtocol_t _protocol = pack(buf, sizeof(buf));
   writeData(0, (uint8_t *)&_protocol, sizeof(_protocol));
-  delay(100);
+  delay(10);
   readData(0, recvbuf, 9);
   float Con=0.0;
   if(FucCheckSum(recvbuf,8) == recvbuf[8])
@@ -266,7 +248,7 @@ float DFRobot_GAS::readGasConcentrationPPM(void)
         case DFRobot_GAS::O2:
           break;
         case DFRobot_GAS::CO:
-          if (((_temp) > -40) && ((_temp) <= 20))
+          if (((_temp) > -20) && ((_temp) < 20))
             Con = (Con / (0.005 * (_temp) + 0.9));
           else if (((_temp) > 20) && ((_temp) < 40))
             Con = (Con / (0.005 * (_temp) + 0.9) - (0.3 * (_temp)-6));
@@ -274,74 +256,66 @@ float DFRobot_GAS::readGasConcentrationPPM(void)
             Con = 0.0;
           break;
         case DFRobot_GAS::H2S:
-          if (((_temp) > -40) && ((_temp) <= 20))
-            Con = (Con / (0.005 * (_temp) + 0.92));
-          else if (((_temp) > 20) && ((_temp) <= 60))
-            Con = (Con - (0.015 * (_temp)-0.3));
+          if (((_temp) > -20) && ((_temp) < 20))
+            Con = (Con / (0.006 * (_temp) + 0.92));
+          else if (((_temp) > 20) && ((_temp) < 40))
+            Con = (Con / (0.006 * (_temp) + 0.92) - (0.015 * (_temp) + 2.4));
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::NO2:
-          if (((_temp) > -20) && ((_temp) <= 0))
-            Con = ((Con / (0.005 * (_temp) + 0.9) - (-0.0025 * (_temp) + 0.005)));
-          else if (((_temp) > 0) && ((_temp) <= 20))
+          if (((_temp) > -20) && ((_temp) < 0))
+            Con = ((Con / (0.005 * (_temp) + 0.9) - (-0.0025 * (_temp))));
+          else if (((_temp) > 0) && ((_temp) < 20))
             Con = ((Con / (0.005 * (_temp) + 0.9) - (0.005 * (_temp) + 0.005)));
-          else if (((_temp) > 20) && ((_temp) <= 40))
-            Con = ((Con / (0.005 * (_temp) + 0.9) - (-0.0025 * (_temp) + 0.3)));
-          else if (((_temp) > 40) && ((_temp) < 50))
-            Con = ((Con / (0.005 * (_temp) + 0.9) - (-0.048 * (_temp)-0.92)));
+          else if (((_temp) > 20) && ((_temp) < 40))
+            Con = ((Con / (0.005 * (_temp) + 0.9) - (0.0025 * (_temp) + 0.1)));
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::O3:
-          if (((_temp) > -20) && ((_temp) <= 0))
+          if (((_temp) > -20) && ((_temp) < 0))
             Con = ((Con / (0.015 * (_temp) + 1.1) - 0.05));
-          else if (((_temp) > 0) && ((_temp) <= 20))
-            Con = ((Con - (0.01 * (_temp))));
-          else if (((_temp) > 20) && ((_temp) <= 40))
-            Con = ((Con - (-0.005 * (_temp) + 0.4)));
-          else if (((_temp) > 40) && ((_temp) < 50))
-            Con = Con - (0.067 * (_temp)-1.68);
+          else if (((_temp) > 0) && ((_temp) < 20))
+            Con = ((Con / 1.1 - (0.01 * (_temp))));
+          else if (((_temp) > 20) && ((_temp) < 40))
+            Con = ((Con / 1.1 - (-0.05 * (_temp) + 0.3)));
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::CL2:
-          if (((_temp) > -20) && ((_temp) <= 0))
-            Con = ((Con / (0.015 * (_temp) + 1.1) - 0.0025));
-          else if (((_temp) > 0) && ((_temp) <= 20))
+          if (((_temp) > -20) && ((_temp) < 0))
+            Con = ((Con / (0.015 * (_temp) + 1.1) - (-0.0025 * (_temp))));
+          else if (((_temp) > 0) && ((_temp) < 20))
             Con = ((Con / 1.1 - 0.005 * (_temp)));
           else if (((_temp) > 20) && ((_temp) < 40))
-            Con = ((Con - (-0.005 * (_temp) + 0.3)));
+            Con = ((Con / 1.1 - (0.06 * (_temp)-0.12)));
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::NH3:
-          if (((_temp) > -40) && ((_temp) <= 0))
-            Con = (Con / (0.006 * (_temp) + 0.95) - (-0.006 * (_temp) + 0.25));
-          else if (((_temp) > 0) && ((_temp) <= 20))
-            Con = (Con / (0.006 * (_temp) + 0.95) - (-0.012 * (_temp) + 0.25));
+          if (((_temp) > -20) && ((_temp) < 0))
+            Con = (Con / (0.08 * (_temp) + 3.98) - (-0.005 * (_temp) + 0.3));
+          else if (((_temp) > 0) && ((_temp) < 20))
+            Con = (Con / (0.08 * (_temp) + 3.98) - (-0.005 * (_temp) + 0.3));
           else if (((_temp) > 20) && ((_temp) < 40))
-            Con = (Con / (0.005 * (_temp) + 1.08) - (-0.1 * (_temp) + 2));
+            Con = (Con / (0.004 * (_temp) + 1.08) - (-0.1 * (_temp) + 2));
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::H2:
-          if (((_temp) > -20) && ((_temp) <= 20))
-            Con = (Con / (0.0074 * (_temp) + 0.7) - 5);
-          if (((_temp) > 20) && ((_temp) <= 40))
-            Con = (Con / (0.025 * (_temp) + 0.3)) - 5;
-          if (((_temp) > 40) && ((_temp) <= 60))
-            Con = (Con / (0.001 * (_temp) + 0.9)) - (0.75 * (_temp)-25);
+          if (((_temp) > -20) && ((_temp) < 40))
+            Con = (Con / (0.74 * (_temp) + 0.007) - 5);
           else
             Con = 0.0;
           break;
         case DFRobot_GAS::HF:
-          if (((_temp) > -20) && ((_temp) <= 0))
-            Con = (((Con / 1) - (-0.0075 * (_temp)-0.1)));
-          else if (((_temp) > 0) && ((_temp) <= 20))
+          if (((_temp) > -20) && ((_temp) < 0))
+            Con = (((Con / 1) - (-0.0025 * (_temp))));
+          else if (((_temp) > 0) && ((_temp) < 20))
             Con = ((Con / 1 + 0.1));
-          else if (((_temp) > 20) && ((_temp) < 50))
-            Con = ((Con / 1 - (0.01 * (_temp)-0.85)));
+          else if (((_temp) > 20) && ((_temp) < 40))
+            Con = ((Con / 1 - (0.0375 * (_temp)-0.85)));
           else
             Con = 0.0;
           break;
@@ -350,18 +324,8 @@ float DFRobot_GAS::readGasConcentrationPPM(void)
             Con = ((Con / (0.005 * (_temp) + 0.9)));
           break;
         case DFRobot_GAS::HCL:
-          if ((_temp > -20) && (_temp >= 0))
-            Con = Con - (-0.0075 * _temp - 0.1);
-          else if ((_temp > 0) && (_temp >= 20))
-            Con = Con - (-0.1);
-          else if ((_temp > 20) && (_temp >= 50))
-            Con = Con - (-0.01 * _temp + 0.1);
           break;
         case DFRobot_GAS::SO2:
-          if ((_temp > -40) && (_temp >= 40))
-            Con = Con / (0.006 * _temp + 0.95);
-          else if ((_temp > 40) && (_temp >= 60))
-            Con = Con / (0.006 * _temp + 0.95) - (0.05 * _temp - 2);
           break;
         default:
           break;
@@ -385,8 +349,10 @@ String DFRobot_GAS::queryGasType(void)
   buf[0] = CMD_GET_GAS_CONCENTRATION;
   sProtocol_t _protocol = pack(buf, sizeof(buf));
   writeData(0, (uint8_t *)&_protocol, sizeof(_protocol));
-  delay(100);
+  delay(10);
   readData(0, recvbuf, 9);
+
+
   if(FucCheckSum(recvbuf,8) == recvbuf[8]){
     switch(recvbuf[4]){
       case 0x05:
@@ -426,6 +392,11 @@ String DFRobot_GAS::queryGasType(void)
         return "PH3";
         break;
       default:
+        Serial.println("none");
+        for(uint8_t i = 0; i < 9; i++){
+          Serial.print(recvbuf[i] ,HEX);
+          Serial.print(" ");
+        }
         return "";
         break;
     }
@@ -437,91 +408,22 @@ String DFRobot_GAS::queryGasType(void)
 bool DFRobot_GAS::setThresholdAlarm(eSwitch_t switchof, uint16_t threshold, eALA_t alamethod,String gasType)
 {
   if (gasType == "O2")
-  {
-    if (threshold==0)
-      threshold=195;
-    else
-      threshold *= 10;
-  }
-  else if (gasType == "SO2")
-  {
-    if (threshold == 0)
-      threshold = 100;
-    else
-      threshold *= 10;
-  }
-  else if (gasType == "PH3")
-  {
-    if (threshold == 0)
-      threshold = 50;
-    else
-      threshold *= 10;
-  }
+    threshold *= 10;
   else if (gasType == "NO2")
-  {
-    if (threshold == 0)
-      threshold = 50;
-    else
-      threshold *= 10;
-  }
+    threshold *= 10;
   else if (gasType == "O3")
-  {
-    if (threshold == 0)
-      threshold = 50;
-    else
-      threshold *= 10;
-  }
+    threshold *= 10;
   else if (gasType == "CL2")
-  {
-    if (threshold == 0)
-      threshold = 50;
-    else
-      threshold *= 10;
-  }
+    threshold *= 10;
   else if (gasType == "HCL")
-  {
-    if (threshold == 0)
-      threshold = 50;
-    else
-      threshold *= 10;
-  }
+    threshold *= 10;
+  else if (gasType == "SO2")
+    threshold *= 10;
   else if (gasType == "HF")
-  {
-    if (threshold == 0)
-      threshold = 30;
-    else
-      threshold *= 10;
-  }
-  else if (gasType == "CO")
-  {
-    if (threshold == 0)
-      threshold = 50;
-    else
-      threshold *= 1;
-  }
-  else if (gasType == "NH3")
-  {
-    if (threshold == 0)
-      threshold = 10;
-    else
-      threshold *= 1;
-  }
-  else if (gasType == "H2S")
-  {
-    if (threshold == 0)
-      threshold = 10;
-    else
-      threshold *= 1;
-  }
-  else if (gasType == "H2")
-  {
-    if (threshold == 0)
-      threshold = 50;
-    else
-      threshold *= 1;
-  }
-  else 
-    return false;
+    threshold *= 10;
+  else if (gasType == "PH3")
+    threshold *= 10;
+
   uint8_t buf[6] = {0};
   uint8_t recvbuf[9] = {0};
   buf[0] = CMD_SET_THRESHOLD_ALARMS;
@@ -531,7 +433,7 @@ bool DFRobot_GAS::setThresholdAlarm(eSwitch_t switchof, uint16_t threshold, eALA
   buf[4] = alamethod;
   sProtocol_t _protocol = pack(buf, sizeof(buf));
   writeData(0, (uint8_t *)&_protocol, sizeof(_protocol));
-  delay(100);
+  delay(10);
   readData(0, recvbuf, 9);
   if (recvbuf[8]!=FucCheckSum(recvbuf,8))
     return false;
@@ -548,7 +450,7 @@ float DFRobot_GAS::readTempC(void)
   buf[0] = CMD_GET_TEMP;
   sProtocol_t _protocol = pack(buf, sizeof(buf));
   writeData(0, (uint8_t *)&_protocol, sizeof(_protocol));
-  delay(100);
+  delay(10);
   readData(0, recvbuf, 9);
   if (recvbuf[8] != FucCheckSum(recvbuf, 8))
     return 0.0;
@@ -572,7 +474,7 @@ float DFRobot_GAS::getSensorVoltage(void)
   buf[0] = CMD_SENSOR_VOLTAGE;
   sProtocol_t _protocol = pack(buf, sizeof(buf));
   writeData(0, (uint8_t *)&_protocol, sizeof(_protocol));
-  delay(100);
+  delay(10);
   readData(0, recvbuf, 9);
   if (recvbuf[8] != FucCheckSum(recvbuf, 8))
     return 0.0;
@@ -588,7 +490,7 @@ bool DFRobot_GAS::changeI2cAddrGroup(uint8_t group)
   buf[1] = group;
   sProtocol_t _protocol = pack(buf, sizeof(buf));
   writeData(0, (uint8_t *)&_protocol, sizeof(_protocol));
-  delay(100);
+  delay(10);
   readData(0, recvbuf, 9);
   if (recvbuf[8] != FucCheckSum(recvbuf, 8))
     return 0;
@@ -625,11 +527,9 @@ bool DFRobot_GAS_I2C::dataIsAvailable(void)
   sProtocol_t _protocol = pack(buf, sizeof(buf));
   writeData(0, (uint8_t *)&_protocol, sizeof(_protocol));
   readData(0, recvbuf, 9);
-  Serial.println("");
   if (recvbuf[8] != FucCheckSum(recvbuf, 8))
     return false;
-  else
-  {
+  else{
     memcpy((uint8_t *)&AllData, recvbuf, 9);
     analysisAllData();
     return true;
@@ -666,15 +566,16 @@ int16_t DFRobot_GAS_I2C::readData(uint8_t Reg,uint8_t *Data,uint8_t len)
 }
 
 //UART underlying communication
-#if (!defined ARDUINO_ESP32_DEV) && (!defined __SAMD21G18A__)
-DFRobot_GAS_SoftWareUart::DFRobot_GAS_SoftWareUart(SoftwareSerial *psoftUart)
+#if defined(ARDUINO_AVR_UNO) || defined(ESP8266)
+DFRobot_GAS_SoftWareUart::DFRobot_GAS_SoftWareUart(SoftwareSerial *psoftUart, uint16_t Baud)
 {
   _psoftUart = psoftUart;
+  this->_baud = Baud;
 }
 
 bool DFRobot_GAS_SoftWareUart::begin(void)
 {
-  _psoftUart->begin(9600);
+  _psoftUart->begin(this->_baud);
   return true;
 }
 
@@ -695,6 +596,7 @@ bool DFRobot_GAS_SoftWareUart::dataIsAvailable(void)
 
 void DFRobot_GAS_SoftWareUart::writeData(uint8_t Reg, void *pData, uint8_t len)
 {
+  Reg++;
   uint8_t* Data = (uint8_t* )pData;
   _psoftUart->write(Data,len);
 }
@@ -702,15 +604,15 @@ void DFRobot_GAS_SoftWareUart::writeData(uint8_t Reg, void *pData, uint8_t len)
 int16_t DFRobot_GAS_SoftWareUart::readData(uint8_t Reg, uint8_t *Data, uint8_t len)
 {
   uint32_t time = millis();
-  uint8_t length;
+  uint8_t length = 0;
+  uint8_t i = 0;
   while((millis()-time)<3000)
   {
     length = _psoftUart->available();
     if (length == len)
       break;
   }
-  int i=0;
-  for (int i = Reg; i < length; i++)
+  for (i = Reg; i < length; i++)
   {
     Data[i] = _psoftUart->read();
     if (i>=8)
@@ -721,14 +623,25 @@ int16_t DFRobot_GAS_SoftWareUart::readData(uint8_t Reg, uint8_t *Data, uint8_t l
 
 #else
 
-DFRobot_GAS_HardWareUart::DFRobot_GAS_HardWareUart(HardwareSerial *phardUart)
+DFRobot_GAS_HardWareUart::DFRobot_GAS_HardWareUart(HardwareSerial *phardUart, uint16_t Baud ,uint8_t txpin, uint8_t rxpin)
 {
   this->_pharduart = phardUart;
+  this->_rxpin = rxpin;
+  this->_txpin = txpin;
+  this->_baud = Baud;
 }
 
 bool DFRobot_GAS_HardWareUart::begin(void)
 {
-  this->_pharduart->begin(9600);
+
+  #ifdef ESP32
+    this->_pharduart->begin(this->_baud, SERIAL_8N1, _txpin, _rxpin);
+  #elif defined(ARDUINO_AVR_UNO) || defined(ESP8266)
+    // nothing use software
+  #else
+    this->_pharduart->begin(this->_baud);  // M0 cannot create a begin in a construct
+  #endif
+  //this->_pharduart->begin(9600);
   return true;
 }
 
@@ -749,6 +662,7 @@ bool DFRobot_GAS_HardWareUart::dataIsAvailable(void)
 
 void DFRobot_GAS_HardWareUart::writeData(uint8_t Reg, void *pData, uint8_t len)
 {
+  Reg++;
   uint8_t *Data = (uint8_t *)pData;
   this->_pharduart->write(Data, len);
 }
@@ -756,7 +670,8 @@ void DFRobot_GAS_HardWareUart::writeData(uint8_t Reg, void *pData, uint8_t len)
 int16_t DFRobot_GAS_HardWareUart::readData(uint8_t Reg, uint8_t *Data, uint8_t len)
 {
   uint32_t time = millis();
-  uint8_t length;
+  uint8_t length = 0;
+  int i = 0;
   while ((millis() - time) < 3000)
   {
     length = _pharduart->available();
@@ -764,8 +679,7 @@ int16_t DFRobot_GAS_HardWareUart::readData(uint8_t Reg, uint8_t *Data, uint8_t l
       break;
   }
 
-  int i = 0;
-  for (int i = Reg; i < length; i++)
+  for (i = Reg; i < length; i++)
   {
     Data[i] = _pharduart->read();
     if (i >= 8)

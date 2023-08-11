@@ -14,11 +14,14 @@
 #include "Arduino.h"
 #include <Wire.h>
 
-#if (!defined ARDUINO_ESP32_DEV) && (!defined __SAMD21G18A__)
-#include "SoftwareSerial.h"
+
+
+#if defined(ARDUINO_AVR_UNO) || defined(ESP8266)
+  #include "SoftwareSerial.h"
 #else
-#include "HardwareSerial.h"
+  #include "HardwareSerial.h"
 #endif
+
 
 #define CMD_CHANGE_GET_METHOD          0X78
 #define CMD_GET_GAS_CONCENTRATION      0X86
@@ -181,8 +184,8 @@ public:
    * @fn setThresholdAlarm
    * @brief Set sensor alarm threshold
    * @param switchof Whether to turn on threshold alarm switch
-   * @n            ON turn on     
-   * @n           OFF turn off
+   * @n            ON turn on
+   * @n            OFF turn off
    * @param threshold The threshold for starting alarm
    * @param alamethod Set sensor high or low threshold alarm
    * @param gasType   Gas Type
@@ -293,11 +296,11 @@ class DFRobot_GAS_I2C : public DFRobot_GAS
     uint8_t _I2C_addr;
 };
 
-#if (!defined ARDUINO_ESP32_DEV) && (!defined __SAMD21G18A__)
+#if defined(ARDUINO_AVR_UNO) || defined(ESP8266)
 class DFRobot_GAS_SoftWareUart : public DFRobot_GAS
 {
   public:
-    DFRobot_GAS_SoftWareUart(SoftwareSerial *psoftUart);
+    DFRobot_GAS_SoftWareUart(SoftwareSerial *psoftUart, uint16_t Baud);
     ~DFRobot_GAS_SoftWareUart(void){};
     bool begin(void);
     bool dataIsAvailable(void);
@@ -306,12 +309,13 @@ class DFRobot_GAS_SoftWareUart : public DFRobot_GAS
     int16_t readData(uint8_t Reg ,uint8_t *Data ,uint8_t len);
   private:
     SoftwareSerial *_psoftUart;
-}; 
+    uint32_t _baud;
+};
 #else
 class DFRobot_GAS_HardWareUart : public DFRobot_GAS
 {
   public:
-    DFRobot_GAS_HardWareUart(HardwareSerial *phardUart);
+    DFRobot_GAS_HardWareUart(HardwareSerial *phardUart, uint16_t Baud ,uint8_t txpin = 0, uint8_t rxpin = 0);
     ~DFRobot_GAS_HardWareUart(void){};
     bool begin(void);
   protected:
@@ -320,7 +324,10 @@ class DFRobot_GAS_HardWareUart : public DFRobot_GAS
     int16_t readData(uint8_t Reg, uint8_t *Data, uint8_t len);
   private:
     HardwareSerial *_pharduart;
+    uint32_t _baud;
+    uint8_t _rxpin;
+    uint8_t _txpin;
 };
-
 #endif
+
 #endif
