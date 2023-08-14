@@ -120,7 +120,6 @@ Download the zip file first to use this library and uncompress it to a folder na
            threshold   : Set alarm threshold
            returntype : 
            GASCON     : Gas concentration
-           GASKIND    : Gas type
     @return status  : init status
             True is : init success
             False is: init error

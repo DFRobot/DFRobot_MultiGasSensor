@@ -16,6 +16,7 @@ import spidev
 import os
 import math
 import RPi.GPIO as GPIO
+import logging
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)  #Display all the print information
@@ -110,10 +111,10 @@ class DFRobot_MultiGasSensor(object):
       self.i2cbus = smbus.SMBus(bus)
       self.__uart_i2c = I2C_MODE
     else:
-      self.ser = serial.Serial("/dev/ttyAMA0" ,baudrate=Baud,stopbits=1, timeout=0.5)
+      self.ser = serial.Serial("/dev/ttyAMA0" ,baudrate=Baud,stopbits=1)
       self.__uart_i2c = UART_MODE
       if self.ser.isOpen == False:
-        self.ser.open()  
+        self.ser.open()
         
   def __getitem__(self, k):
     if k == recvbuf:
@@ -242,7 +243,7 @@ class DFRobot_MultiGasSensor(object):
         Con = Con - (0.01 * self.temp)
       elif (self.temp > 20) and (self.temp <= 40):
         Con = Con - (0.005 * self.temp + 0.4)
-      elif (self.temp > 40) and (self.temp < 50):
+      elif (self.temp > 40) and (self.temp <= 50):
         Con = Con - (0.007 * self.temp - 1.68)
       else:
          Con = 0.0
@@ -449,7 +450,7 @@ class DFRobot_MultiGasSensor(object):
     else:
       return 0xff   
     
-  def set_threshold_alarm(self,switchof,threshold,gasType):
+  def set_threshold_alarm(self,switchof,threshold):
     '''!
       @brief Set sensor alarm threshold
       @param switchof Set whether to turn on alarm function
@@ -609,7 +610,8 @@ class DFRobot_MultiGasSensor_I2C(DFRobot_MultiGasSensor):
     sendbuf[8]=fuc_check_sum(sendbuf,8)
     self.write_data(0,sendbuf,9)
     time.sleep(0.1)
-    self.read_data(0,recvbuf,9)  
+    self.read_data(0,recvbuf,9)
+          
     if (recvbuf[8] == fuc_check_sum(recvbuf, 8)):
       self.analysis_all_data(recvbuf)
       return True
@@ -641,7 +643,10 @@ class DFRobot_MultiGasSensor_I2C(DFRobot_MultiGasSensor):
       rslt = self.i2cbus.read_i2c_block_data(self.__addr ,reg , length)
     except:
       rslt = -1
-    recvbuf=rslt
+      return -1
+    
+    for i in range(length):
+      data[i] = rslt[i]  
     return length
     
 class DFRobot_MultiGasSensor_UART(DFRobot_MultiGasSensor):
@@ -661,7 +666,7 @@ class DFRobot_MultiGasSensor_UART(DFRobot_MultiGasSensor):
       *@return Whether data from sensor is available
       *@retval  True  success is Available
       *@retval  False  error is unavailable
-    '''    
+    '''
     if(self.read_data(0,recvbuf,9)==9):
       if(fuc_check_sum(recvbuf,8) == recvbuf[8]):
         self.analysis_all_data(recvbuf)

@@ -119,12 +119,11 @@ NO2 O3 CL2 NH3 H2 HCL SO2 HF PH3等气体。只需要硬件切换对应
            threshold   ：设置报警的阈值
            returntype ：
            GASCON     :气体浓度
-           GASKIND    :气体种类
     @return status  ： init status
             True is ： init success
             False is： init error
   '''
-  def set_threshold_alarm(self,switchof,threshold,gasType):    
+  def set_threshold_alarm(self,switchof,threshold):    
 
   '''
     @brief 获取传感器的板载温度

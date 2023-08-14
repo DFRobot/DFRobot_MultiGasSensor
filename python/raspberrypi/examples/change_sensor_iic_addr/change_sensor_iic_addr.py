@@ -39,7 +39,7 @@ from DFRobot_MultiGasSensor import *
   ctype=1:UART
   ctype=0:IIC
 '''
-ctype=1
+ctype=0
 
 if ctype==0:
   I2C_1       = 0x01               # I2C_1 Use i2c1 interface (or i2c0 with configuring Raspberry Pi) to drive sensor
@@ -50,7 +50,7 @@ else:
 
 def setup():
   #Change i2c address set
-  while(gas.change_i2c_addr_group(6)==0):
+  while(gas.change_i2c_addr_group(1)==0):
     print ("IIC addr change fail!")
     time.sleep(1)
   print ("IIC addr change success!")

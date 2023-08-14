@@ -48,6 +48,13 @@ if ctype==0:
   gas = DFRobot_MultiGasSensor_I2C(I2C_1 ,I2C_ADDRESS)
 else:
   gas = DFRobot_MultiGasSensor_UART(9600)
+  
+#Mode of obtaining data: the main controller needs to request the sensor for data
+while (False == gas.change_acquire_mode(gas.PASSIVITY)):
+  print("wait acquire mode change!")
+  time.sleep(1)
+print("change acquire mode success!")
+
 
 def loop():
   print ("The board temperature is:"+str(round(gas.read_temp(),3))+" C")

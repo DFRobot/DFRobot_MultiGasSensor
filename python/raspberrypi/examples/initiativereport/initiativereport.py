@@ -40,15 +40,15 @@ from DFRobot_MultiGasSensor import *
   ctype=1:UART
   ctype=0:IIC
 '''
-ctype=1
+ctype=0
 
 if ctype==0:
   I2C_1       = 0x01               # I2C_1 Use i2c1 interface (or i2c0 with configuring Raspberry Pi) to drive sensor
   I2C_ADDRESS = 0x77               # I2C Device address, which can be changed by changing A1 and A0, the default address is 0x77
   gas = DFRobot_MultiGasSensor_I2C(I2C_1 ,I2C_ADDRESS)
-else:
-  gas = DFRobot_MultiGasSensor_UART(9600)
 
+
+# This routine does not support serial ports
 def setup():
   #Set the sensor to the mode of proactively reporting data
   gas.change_acquire_mode(gas.INITIATIVE)
@@ -62,7 +62,7 @@ def loop():
     print("------------------------")
     print("temp:"+str(round(gas.temp,3))+" C")
     print("========================")
-  #time.sleep(1)
+  time.sleep(1)
 
 if __name__ == "__main__":
   setup()

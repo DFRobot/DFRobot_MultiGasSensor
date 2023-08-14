@@ -44,7 +44,7 @@ from DFRobot_MultiGasSensor import *
   ctype=1:UART
   ctype=0:IIC
 '''
-ctype=1
+ctype=0
 
 if ctype==0:
   I2C_1       = 0x01               # I2C_1 Use i2c1 interface (or i2c0 with configuring Raspberry Pi) to drive sensor
@@ -57,7 +57,12 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(pin,GPIO.IN)
 
 def setup():
-  while (False==gas.set_threshold_alarm(gas.ON,20,read_gas_type)):
+  #Mode of obtaining data: the main controller needs to request the sensor for data
+  while (False == gas.change_acquire_mode(gas.PASSIVITY)):
+    print("wait acquire mode change!")
+    time.sleep(1)
+  print("change acquire mode success!")
+  while (False==gas.set_threshold_alarm(gas.ON,180)):
     print ("set alarm ERROR!")
     time.sleep(1)
   
