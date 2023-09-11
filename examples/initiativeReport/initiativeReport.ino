@@ -52,13 +52,6 @@
   #else
     DFRobot_GAS_HardWareUart gas(&Serial1 ,9600);
   #endif
-#else
-/**
-  ESP32:IO16-----RX
-        IO17-----TX
-*/
-DFRobot_GAS_HardWareUart gas(&Serial2); //ESP32HardwareSerial
-#endif
 #endif
 
 void setup() {

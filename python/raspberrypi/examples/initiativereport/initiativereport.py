@@ -37,7 +37,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath
 from DFRobot_MultiGasSensor import *
 
 '''
-  ctype=1:UART
+  This routine does not support serial ports
   ctype=0:IIC
 '''
 ctype=0
