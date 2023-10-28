@@ -134,6 +134,7 @@ class DFRobot_MultiGasSensor(object):
       self.gasunits = "ppm"
     elif probe_type == self.H2S:
       self.gastype = DFRobot_GasType.H2S
+      self.gasunits = "ppm"
     elif probe_type == self.NO2:
       self.gasunits = "ppm"
       self.gastype = DFRobot_GasType.NO2
@@ -220,7 +221,7 @@ class DFRobot_MultiGasSensor(object):
       if (self.temp > -20) and (self.temp <= 20):
         Con = Con / (0.005 * self.temp + 0.92)
       elif (self.temp > 20) and (self.temp <= 60):
-        Con = Con - (0.015 * self.temp - 0.3);
+        Con = Con / (0.015 * self.temp - 0.3);
       else:
         Con = 0.0
 
