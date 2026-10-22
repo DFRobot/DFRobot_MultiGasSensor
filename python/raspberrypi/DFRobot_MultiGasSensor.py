@@ -203,7 +203,7 @@ class DFRobot_MultiGasSensor(object):
     
     # If temperature corrections not enabled, don't alter the sensor value.
     if self.tempSwitch != self.ON:
-      return 0.0
+      return Con
 
     if self.gastype == DFRobot_GasType.O2:
       # No temperature dependency.
